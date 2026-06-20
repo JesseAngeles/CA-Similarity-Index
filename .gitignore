@@ -1,0 +1,19 @@
+# Mathematica cache
+*.mx
+*.nb~
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.fls
+*.fdb_latexmk
+*.blg
+*.bbl
+*.bcf
+*.run.xml
+
+# Backups generados automáticamente
+*_backup_*.nb
