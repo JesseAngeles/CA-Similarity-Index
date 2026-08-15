@@ -5,17 +5,6 @@
 
 (* CreatedBy='Wolfram 15.0' *)
 
-(*CacheID: 234*)
-(* Internal cache information:
-NotebookFileLineBreakTest
-NotebookFileLineBreakTest
-NotebookDataPosition[       154,          7]
-NotebookDataLength[   5137949,      89612]
-NotebookOptionsPosition[   5116904,      89277]
-NotebookOutlinePosition[   5117296,      89293]
-CellTagsIndexPosition[   5117253,      89290]
-WindowFrame->Normal*)
-
 (* Beginning of Notebook Content *)
 Notebook[{
 
