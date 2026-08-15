@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[   5185893,      90015]
-NotebookOptionsPosition[   5166584,      89713]
-NotebookOutlinePosition[   5166976,      89729]
-CellTagsIndexPosition[   5166933,      89726]
+NotebookDataLength[   5209045,      90596]
+NotebookOptionsPosition[   5187042,      90265]
+NotebookOutlinePosition[   5187434,      90281]
+CellTagsIndexPosition[   5187391,      90278]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -88425,6 +88425,559 @@ CoEXnKRMEyzT/+M8akopyqD8DRqpmWqW5XKw2N78XWZ1MUDVgBv5XgG6LZww
 
 Cell[CellGroupData[{
 
+Cell["Game of Life", "Chapter",ExpressionUUID->"67597e05-7238-4f1e-897b-ef8d1097fc05"],
+
+Cell["\<\
+In this chapter we apply the same methods (functional graph quotiented by \
+symmetries, and spectral moments) to Conway's Game of Life and two life-like \
+variants, to see whether the comparison generalizes to a 2-dimensional \
+cellular automaton.\
+\>", "Text",ExpressionUUID->"6549471d-8577-4135-94c7-3181aa23a53e"],
+
+Cell["\<\
+We define the evolution step on a toroidal grid (cyclic boundary on both \
+axes, the same philosophy as CaArray in 1D), with Moore neighborhood (8 \
+neighbors) and birth/survival rules given by sets of live-neighbor counts.\
+\>", "Text",ExpressionUUID->"42def20a-9658-4f22-b95f-fa3f94380e17"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"rows", "=", "4"}], ";", 
+  RowBox[{"cols", "=", "4"}], ";"}]], "Input",ExpressionUUID->"59ce9222-b051-\
+4892-b6a6-abb490250bc8"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"neighborSum2D", "[", 
+    RowBox[{"state_", "?", "MatrixQ"}], "]"}], ":=", 
+   RowBox[{"Total", "[", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"RotateLeft", "[", 
+        RowBox[{"state", ",", "#1"}], "]"}], "&"}], ")"}], "/@", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"-", "1"}], ",", 
+         RowBox[{"-", "1"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"-", "1"}], ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"-", "1"}], ",", "1"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", 
+         RowBox[{"-", "1"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "1"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", 
+         RowBox[{"-", "1"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "1"}], "}"}]}], "}"}]}], "]"}]}], ";", 
+  RowBox[{
+   RowBox[{"Life2DStep", "[", 
+    RowBox[{
+     RowBox[{"state_", "?", "MatrixQ"}], ",", "birthSet_List", ",", 
+     "survivalSet_List"}], "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", "nb", "}"}], ",", 
+     RowBox[{
+      RowBox[{"nb", "=", 
+       RowBox[{"neighborSum2D", "[", "state", "]"}]}], ";", 
+      RowBox[{"MapThread", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"If", "[", 
+          RowBox[{
+           RowBox[{"#1", "\[Equal]", "1"}], ",", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"MemberQ", "[", 
+              RowBox[{"survivalSet", ",", "#2"}], "]"}], ",", "1", ",", "0"}],
+             "]"}], ",", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"MemberQ", "[", 
+              RowBox[{"birthSet", ",", "#2"}], "]"}], ",", "1", ",", "0"}], 
+            "]"}]}], "]"}], "&"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"state", ",", "nb"}], "}"}], ",", "2"}], "]"}]}]}], 
+    "]"}]}]}]], "Input",ExpressionUUID->"6177bd27-e037-45e6-a76a-\
+e6364f318bf7"],
+
+Cell["\<\
+We check the implementation against known Game of Life patterns: a block \
+(still life) should stay unchanged, and a horizontal blinker should rotate to \
+vertical.\
+\>", "Text",ExpressionUUID->"432aa48f-ca7d-4367-b0c8-981c7fb0ff5e"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"block", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"1", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "0", ",", "0"}], "}"}]}], "}"}]}], ";", 
+  RowBox[{"blinker", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"1", ",", "1", ",", "1", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "0", ",", "0"}], "}"}]}], "}"}]}], ";", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"Life2DStep", "[", 
+      RowBox[{"block", ",", 
+       RowBox[{"{", "3", "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"2", ",", "3"}], "}"}]}], "]"}], "\[Equal]", "block"}], ",", 
+    RowBox[{"Life2DStep", "[", 
+     RowBox[{"blinker", ",", 
+      RowBox[{"{", "3", "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"2", ",", "3"}], "}"}]}], "]"}]}], "}"}]}]], "Input",Expression\
+UUID->"aec86533-5b54-42f0-8ec4-bd80a80e725a"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"True", ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"0", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "0", ",", "0"}], "}"}]}], "}"}]}], 
+  "}"}]], "Output",ExpressionUUID->"7f1b47c2-4c68-4007-8007-c54183cbe812"],
+
+Cell["\<\
+The graph-construction method combining permutations that we used in 1D \
+identified cyclic rotations. Its natural analog in 2D is identifying \
+configurations that are toroidal translations of each other (shifts in x and \
+y, with wraparound):\
+\>", "Text",ExpressionUUID->"f0811676-1b9c-47e7-9d6f-625b7cda2908"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"TransClass2D", "[", "flat_List", "]"}], ":=", 
+  RowBox[{"First", "[", 
+   RowBox[{"Sort", "[", 
+    RowBox[{"Flatten", "/@", 
+     RowBox[{"Flatten", "[", 
+      RowBox[{
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"RotateLeft", "[", 
+          RowBox[{
+           RowBox[{"RotateLeft", "[", 
+            RowBox[{
+             RowBox[{"Partition", "[", 
+              RowBox[{"flat", ",", "cols"}], "]"}], ",", "i"}], "]"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"0", ",", "j"}], "}"}]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", "0", ",", 
+           RowBox[{"rows", "-", "1"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"j", ",", "0", ",", 
+           RowBox[{"cols", "-", "1"}]}], "}"}]}], "]"}], ",", "1"}], "]"}]}], 
+    "]"}], "]"}]}]], "Input",ExpressionUUID->"9e5d75a5-1357-4f34-b9f1-\
+b569c362d4d0"],
+
+Cell["\<\
+We propose a 4x4 toroidal grid (16 cells): this gives 2^16 = 65536 raw \
+configurations, the same scale already tested in 1D at size=16 \
+(computationally feasible, ~0.3s per rule there), and large enough for \
+non-trivial Life patterns (oscillators, etc.) to appear.\
+\>", "Text",ExpressionUUID->"d89f3803-c1b7-4043-878f-c46a0bedc7db"],
+
+Cell[BoxData[
+ RowBox[{"classes2D", "=", 
+  RowBox[{"DeleteDuplicates", "[", 
+   RowBox[{"ParallelMap", "[", 
+    RowBox[{"TransClass2D", ",", 
+     RowBox[{"Tuples", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"0", ",", "1"}], "}"}], ",", 
+       RowBox[{"rows", " ", "cols"}]}], "]"}]}], "]"}], "]"}]}]], "Input",Expr\
+essionUUID->"a061bc2d-8949-4008-991e-cb6b44720551"],
+
+Cell[BoxData["4156"], "Output",ExpressionUUID->"0830f83f-0976-4930-8c62-2af087b53a15"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"MakeGraphLife2D", "[", 
+   RowBox[{"birthSet_List", ",", "survivalSet_List", ",", "classes_List"}], 
+   "]"}], ":=", 
+  RowBox[{"Module", "[", 
+   RowBox[{
+    RowBox[{"{", "succ", "}"}], ",", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"succ", "[", "flat_List", "]"}], ":=", 
+      RowBox[{"TransClass2D", "[", 
+       RowBox[{"Flatten", "[", 
+        RowBox[{"Life2DStep", "[", 
+         RowBox[{
+          RowBox[{"Partition", "[", 
+           RowBox[{"flat", ",", "cols"}], "]"}], ",", "birthSet", ",", 
+          "survivalSet"}], "]"}], "]"}], "]"}]}], ";", 
+     RowBox[{"Graph", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"FromDigits", "[", 
+            RowBox[{"#1", ",", "2"}], "]"}], "\[Rule]", 
+           RowBox[{"FromDigits", "[", 
+            RowBox[{
+             RowBox[{"succ", "[", "#1", "]"}], ",", "2"}], "]"}]}], "&"}], 
+         ")"}], "/@", "classes"}], ",", 
+       RowBox[{"VertexLabels", "\[Rule]", "Automatic"}]}], "]"}]}]}], 
+   "]"}]}]], "Input",ExpressionUUID->"bc3785c7-3cd3-4768-9fb0-21944e20eeee"],
+
+Cell["\<\
+The 3 rules to compare (B/S notation = birth/survival by live-neighbor \
+count): standard Life (B3/S23), Life where a cell also stays alive if all 8 \
+neighbors are alive (B3/S238), and Life where a cell also revives if all 8 \
+neighbors are alive (B38/S23).\
+\>", "Text",ExpressionUUID->"6efcf599-4ece-4a01-828a-272403721fe5"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"gLife", "=", 
+   RowBox[{"MakeGraphLife2D", "[", 
+    RowBox[{
+     RowBox[{"{", "3", "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"2", ",", "3"}], "}"}], ",", "classes2D"}], "]"}]}], ";", 
+  RowBox[{"gLifeS8", "=", 
+   RowBox[{"MakeGraphLife2D", "[", 
+    RowBox[{
+     RowBox[{"{", "3", "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"2", ",", "3", ",", "8"}], "}"}], ",", "classes2D"}], "]"}]}], ";", 
+  RowBox[{"gLifeB8", "=", 
+   RowBox[{"MakeGraphLife2D", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"3", ",", "8"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"2", ",", "3"}], "}"}], ",", "classes2D"}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"2f3dce78-7544-49c5-92e3-aeceb1cd2fd6"],
+
+Cell["\<\
+Instead of guessing the number of steps needed, we first build the 3 graphs \
+and measure the actual cycle lengths that appear in them, setting kmax to the \
+maximum found among the 3 rules -- so the spectral-moments vector captures \
+all the real periodicity without wasting computation.\
+\>", "Text",ExpressionUUID->"af4d1984-6be8-46c0-b5f9-b505d8bc3a7f"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"GraphCycleLengths", "[", "g_Graph", "]"}], ":=", 
+  RowBox[{"Module", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+     "verts", ",", "index", ",", "f", ",", "n", ",", "succ", ",", "indeg", ",",
+       "resto", ",", "queue", ",", "qi", ",", "v", ",", "visited", ",", 
+      "cycles"}], "}"}], ",", 
+    RowBox[{
+     RowBox[{"verts", "=", 
+      RowBox[{"VertexList", "[", "g", "]"}]}], ";", 
+     RowBox[{"n", "=", 
+      RowBox[{"Length", "[", "verts", "]"}]}], ";", 
+     RowBox[{"index", "=", 
+      RowBox[{"AssociationThread", "[", 
+       RowBox[{"verts", ",", 
+        RowBox[{"Range", "[", "n", "]"}]}], "]"}]}], ";", 
+     RowBox[{"succ", "=", 
+      RowBox[{"Association", "[", 
+       RowBox[{
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{
+           RowBox[{
+           "#1", "\[LeftDoubleBracket]", "1", "\[RightDoubleBracket]"}], "\[Rule]", 
+           RowBox[{
+           "#1", "\[LeftDoubleBracket]", "2", "\[RightDoubleBracket]"}]}], 
+          "&"}], ")"}], "/@", 
+        RowBox[{"EdgeList", "[", "g", "]"}]}], "]"}]}], ";", 
+     RowBox[{"f", "=", 
+      RowBox[{"Table", "[", 
+       RowBox[{
+        RowBox[{"index", "[", 
+         RowBox[{"succ", "[", "v", "]"}], "]"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"v", ",", "verts"}], "}"}]}], "]"}]}], ";", 
+     RowBox[{"indeg", "=", 
+      RowBox[{"ConstantArray", "[", 
+       RowBox[{"0", ",", "n"}], "]"}]}], ";", 
+     RowBox[{"Do", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"indeg", "\[LeftDoubleBracket]", 
+         RowBox[{"f", "\[LeftDoubleBracket]", "i", "\[RightDoubleBracket]"}], 
+         "\[RightDoubleBracket]"}], "++"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"i", ",", "n"}], "}"}]}], "]"}], ";", 
+     RowBox[{"resto", "=", "indeg"}], ";", 
+     RowBox[{"queue", "=", 
+      RowBox[{"Flatten", "[", 
+       RowBox[{"Position", "[", 
+        RowBox[{"resto", ",", "0"}], "]"}], "]"}]}], ";", 
+     RowBox[{"qi", "=", "1"}], ";", 
+     RowBox[{"While", "[", 
+      RowBox[{
+       RowBox[{"qi", "\[LessEqual]", 
+        RowBox[{"Length", "[", "queue", "]"}]}], ",", 
+       RowBox[{
+        RowBox[{"v", "=", 
+         RowBox[{"queue", "\[LeftDoubleBracket]", 
+          RowBox[{"qi", "++"}], "\[RightDoubleBracket]"}]}], ";", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"--", 
+            RowBox[{"resto", "\[LeftDoubleBracket]", 
+             RowBox[{
+             "f", "\[LeftDoubleBracket]", "v", "\[RightDoubleBracket]"}], 
+             "\[RightDoubleBracket]"}]}], "\[Equal]", "0"}], ",", 
+          RowBox[{"AppendTo", "[", 
+           RowBox[{"queue", ",", 
+            RowBox[{
+            "f", "\[LeftDoubleBracket]", "v", "\[RightDoubleBracket]"}]}], 
+           "]"}]}], "]"}]}]}], "]"}], ";", 
+     RowBox[{"visited", "=", 
+      RowBox[{"ConstantArray", "[", 
+       RowBox[{"False", ",", "n"}], "]"}]}], ";", 
+     RowBox[{"cycles", "=", 
+      RowBox[{"{", "}"}]}], ";", 
+     RowBox[{"Do", "[", 
+      RowBox[{
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{
+           "resto", "\[LeftDoubleBracket]", "v", "\[RightDoubleBracket]"}], ">",
+            "0"}], "&&", 
+          RowBox[{"!", 
+           RowBox[{
+           "visited", "\[LeftDoubleBracket]", "v", 
+            "\[RightDoubleBracket]"}]}]}], ",", 
+         RowBox[{"Module", "[", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"c", "=", 
+              RowBox[{"{", "}"}]}], ",", 
+             RowBox[{"w", "=", "v"}]}], "}"}], ",", 
+           RowBox[{
+            RowBox[{"While", "[", 
+             RowBox[{
+              RowBox[{"!", 
+               RowBox[{
+               "visited", "\[LeftDoubleBracket]", "w", 
+                "\[RightDoubleBracket]"}]}], ",", 
+              RowBox[{
+               RowBox[{
+                RowBox[{
+                "visited", "\[LeftDoubleBracket]", "w", 
+                 "\[RightDoubleBracket]"}], "=", "True"}], ";", 
+               RowBox[{"AppendTo", "[", 
+                RowBox[{"c", ",", "w"}], "]"}], ";", 
+               RowBox[{"w", "=", 
+                RowBox[{
+                "f", "\[LeftDoubleBracket]", "w", 
+                 "\[RightDoubleBracket]"}]}]}]}], "]"}], ";", 
+            RowBox[{"AppendTo", "[", 
+             RowBox[{"cycles", ",", 
+              RowBox[{"Length", "[", "c", "]"}]}], "]"}]}]}], "]"}]}], "]"}], 
+       ",", 
+       RowBox[{"{", 
+        RowBox[{"v", ",", "n"}], "}"}]}], "]"}], ";", "cycles"}]}], 
+   "]"}]}]], "Input",ExpressionUUID->"ef86b71d-e269-4a09-93f9-cf446c82e813"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"cyclesLife", "=", 
+   RowBox[{"GraphCycleLengths", "[", "gLife", "]"}]}], ";", 
+  RowBox[{"cyclesLifeS8", "=", 
+   RowBox[{"GraphCycleLengths", "[", "gLifeS8", "]"}]}], ";", 
+  RowBox[{"cyclesLifeB8", "=", 
+   RowBox[{"GraphCycleLengths", "[", "gLifeB8", "]"}]}], ";", 
+  RowBox[{"kmaxLife", "=", 
+   RowBox[{"Max", "[", 
+    RowBox[{"Join", "[", 
+     RowBox[{"cyclesLife", ",", "cyclesLifeS8", ",", "cyclesLifeB8"}], "]"}], 
+    "]"}]}]}]], "Input",ExpressionUUID->"4b19b001-d93f-440f-8a18-\
+0af3cd5e6166"],
+
+Cell[BoxData["8"], "Output",ExpressionUUID->"375fd998-30f5-4d84-a6d4-5c10e334caa7"],
+
+Cell["\<\
+We compute and preserve the 3 spectral-moments vectors (kmax=8) explicitly, \
+in a table alongside each rule's name:\
+\>", "Text",ExpressionUUID->"da2bd513-ecfa-42aa-ab90-e7463aa21d4c"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"vecLife", "=", 
+   RowBox[{"SpectralMoments", "[", 
+    RowBox[{"gLife", ",", "kmaxLife"}], "]"}]}], ";", 
+  RowBox[{"vecLifeS8", "=", 
+   RowBox[{"SpectralMoments", "[", 
+    RowBox[{"gLifeS8", ",", "kmaxLife"}], "]"}]}], ";", 
+  RowBox[{"vecLifeB8", "=", 
+   RowBox[{"SpectralMoments", "[", 
+    RowBox[{"gLifeB8", ",", "kmaxLife"}], "]"}]}], ";", 
+  RowBox[{"ruleNames", "=", 
+   RowBox[{"{", 
+    RowBox[{"\"\<Life (B3/S23)\>\"", ",", "\"\<Life+S8 (B3/S238)\>\"", 
+     ",", "\"\<Life+B8 (B38/S23)\>\""}], "}"}]}], ";", 
+  RowBox[{"vectorTable", "=", 
+   RowBox[{"Grid", "[", 
+    RowBox[{
+     RowBox[{"Prepend", "[", 
+      RowBox[{
+       TemplateBox[{
+         RowBox[{"{", 
+           RowBox[{"ruleNames", ",", 
+             RowBox[{"{", 
+               RowBox[{"vecLife", ",", "vecLifeS8", ",", "vecLifeB8"}], 
+               "}"}]}], "}"}]},
+        "Transpose"], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Rule\>\"", ",", "\"\<Spectral moments vector\>\""}], 
+        "}"}]}], "]"}], ",", 
+     RowBox[{"Frame", "\[Rule]", "All"}], ",", 
+     RowBox[{"Alignment", "\[Rule]", "Left"}]}], "]"}]}]}]], "Input",Expressio\
+nUUID->"3a3d96ba-8c69-4f78-b2a6-bd0ab99a2bf1"],
+
+Cell[BoxData[
+ TagBox[GridBox[{
+    {"\<\"Rule\"\>", "\<\"Spectral moments vector\"\>"},
+    {"\<\"Life (B3/S23)\"\>", 
+     RowBox[{"{", 
+      RowBox[{
+      "0.004331087584215592`", ",", "0.009143407122232916`", ",", 
+       "0.004331087584215592`", ",", "0.009143407122232916`", ",", 
+       "0.004331087584215592`", ",", "0.009143407122232916`", ",", 
+       "0.004331087584215592`", ",", "0.020692974013474495`"}], "}"}]},
+    {"\<\"Life+S8 (B3/S238)\"\>", 
+     RowBox[{"{", 
+      RowBox[{
+      "0.004571703561116458`", ",", "0.010346487006737248`", ",", 
+       "0.004571703561116458`", ",", "0.010346487006737248`", ",", 
+       "0.004571703561116458`", ",", "0.010346487006737248`", ",", 
+       "0.004571703561116458`", ",", "0.021896053897978825`"}], "}"}]},
+    {"\<\"Life+B8 (B38/S23)\"\>", 
+     RowBox[{"{", 
+      RowBox[{
+      "0.004331087584215592`", ",", "0.009143407122232916`", ",", 
+       "0.004331087584215592`", ",", "0.009143407122232916`", ",", 
+       "0.004331087584215592`", ",", "0.009143407122232916`", ",", 
+       "0.004331087584215592`", ",", "0.020692974013474495`"}], "}"}]}
+   },
+   AutoDelete->False,
+   GridBoxAlignment->{"Columns" -> {{Left}}},
+   GridBoxFrame->{"Columns" -> {{True}}, "Rows" -> {{True}}},
+   GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+  "Grid"]], "Output",ExpressionUUID->"4ed6e979-e351-4363-8bf6-645f7f37fd41"],
+
+Cell["We compare the 3 vectors using cosine distance:", "Text",ExpressionUUID->"2966ff6b-a681-4ea6-88cf-c61fedc2e2a6"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"distMatrix", "=", 
+   RowBox[{"Table", "[", 
+    RowBox[{
+     RowBox[{"CosineDistance", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"vecLife", ",", "vecLifeS8", ",", "vecLifeB8"}], "}"}], "\[LeftDoubleBracket]",
+         "i", "\[RightDoubleBracket]"}], ",", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"vecLife", ",", "vecLifeS8", ",", "vecLifeB8"}], "}"}], "\[LeftDoubleBracket]",
+         "j", "\[RightDoubleBracket]"}]}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"i", ",", "3"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"j", ",", "3"}], "}"}]}], "]"}]}], ";", 
+  RowBox[{"distGrid", "=", 
+   RowBox[{"Grid", "[", 
+    RowBox[{
+     RowBox[{"Prepend", "[", 
+      RowBox[{
+       TemplateBox[{
+         RowBox[{"Prepend", "[", 
+           RowBox[{
+             
+             TemplateBox[{"distMatrix"}, "Transpose", SyntaxForm -> 
+              SuperscriptBox], ",", "ruleNames"}], "]"}]},
+        "Transpose"], ",", 
+       RowBox[{"Prepend", "[", 
+        RowBox[{"ruleNames", ",", "\"\<\>\""}], "]"}]}], "]"}], ",", 
+     RowBox[{"Frame", "\[Rule]", "All"}]}], "]"}]}]}]], "Input",ExpressionUUID\
+->"23d19338-4c51-494c-8d64-fd102eeac2f9"],
+
+Cell[BoxData[
+ TagBox[GridBox[{
+    {"\<\"\"\>", "\<\"Life (B3/S23)\"\>", "\<\"Life+S8 (B3/S238)\"\>", \
+"\<\"Life+B8 (B38/S23)\"\>"},
+    {"\<\"Life (B3/S23)\"\>", "0.`", "0.0005162453474830686`", "0.`"},
+    {"\<\"Life+S8 (B3/S238)\"\>", "0.0005162453474830686`", "0.`", 
+     "0.0005162453474830686`"},
+    {"\<\"Life+B8 (B38/S23)\"\>", "0.`", "0.0005162453474830686`", "0.`"}
+   },
+   AutoDelete->False,
+   GridBoxFrame->{"Columns" -> {{True}}, "Rows" -> {{True}}},
+   GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+  "Grid"]], "Output",ExpressionUUID->"eeae1450-57ab-45e2-a7fb-fba05f7b7536"],
+
+Cell["\<\
+Life and Life+B8 (revive with 8 live neighbors) give an identical vector -- \
+cosine distance 0 -- at this grid size: the rule of reviving when all \
+neighbors are alive never fires in a way that changes the graph's cycle \
+structure once quotiented. Life+S8 (stay alive with 8 neighbors) does produce \
+a slightly different vector (distance 0.0005 from the other two), though the \
+difference is small. This suggests that, at least at this space size, the \
+survival modification has more structural impact than the birth modification.\
+\
+\>", "Text",ExpressionUUID->"d17e1500-0f68-4c46-bd06-69810b972511"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
 Cell["Functions", "Chapter",
  CellChangeTimes->{{3.994207584907071*^9, 
   3.994207585695094*^9}},ExpressionUUID->"39897350-5dd2-48ef-8052-\
@@ -88442,8 +88995,7 @@ Cell[CellGroupData[{
 Cell[BoxData[{
  RowBox[{
   RowBox[{
-   RowBox[{"Unprotect", "[", "RulePlot", "]"}], ";"}], 
-  "\[IndentingNewLine]"}], "\n", 
+   RowBox[{"Unprotect", "[", "RulePlot", "]"}], ";"}], "\n"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"Quiet", "[", 
    RowBox[{
@@ -88467,7 +89019,7 @@ Cell[BoxData[{
           RowBox[{"1", "/", "2"}]}], "}"}], "]"}], ",", 
        RowBox[{"opts", ":", 
         RowBox[{"OptionsPattern", "[", "]"}]}]}], "]"}], "=."}], "]"}], ";"}],
-   "\[IndentingNewLine]"}], "\n", 
+   "\n"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
    RowBox[{
@@ -88590,7 +89142,7 @@ Cell[BoxData[{
            RowBox[{"legend", "===", "None"}], ",", "g", ",", 
            RowBox[{"Legended", "[", 
             RowBox[{"g", ",", "legend"}], "]"}]}], "]"}]}], "]"}]}]}], 
-     "]"}]}], ";"}], "\[IndentingNewLine]"}], "\n", 
+     "]"}]}], ";"}], "\n"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"Protect", "[", "RulePlot", "]"}], ";"}]}], "Input",
  InitializationCell->True,
@@ -89950,68 +90502,97 @@ Cell[5112638, 88315, 5255, 106, 70, "Output",ExpressionUUID->"d364ce5a-ef01-4aac
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5117942, 88427, 154, 3, 70, "Chapter",ExpressionUUID->"39897350-5dd2-48ef-8052-4f600a59f43f"],
+Cell[5117942, 88427, 86, 0, 70, "Chapter",ExpressionUUID->"67597e05-7238-4f1e-897b-ef8d1097fc05"],
+Cell[5118031, 88429, 326, 5, 70, "Text",ExpressionUUID->"6549471d-8577-4135-94c7-3181aa23a53e"],
+Cell[5118360, 88436, 302, 4, 70, "Text",ExpressionUUID->"42def20a-9658-4f22-b95f-fa3f94380e17"],
+Cell[5118665, 88442, 163, 4, 70, "Input",ExpressionUUID->"59ce9222-b051-4892-b6a6-abb490250bc8"],
+Cell[5118831, 88448, 2120, 65, 70, "Input",ExpressionUUID->"6177bd27-e037-45e6-a76a-e6364f318bf7"],
+Cell[5120954, 88515, 243, 4, 70, "Text",ExpressionUUID->"432aa48f-ca7d-4367-b0c8-981c7fb0ff5e"],
+Cell[5121200, 88521, 1306, 37, 70, "Input",ExpressionUUID->"aec86533-5b54-42f0-8ec4-bd80a80e725a"],
+Cell[5122509, 88560, 495, 13, 70, "Output",ExpressionUUID->"7f1b47c2-4c68-4007-8007-c54183cbe812"],
+Cell[5123007, 88575, 323, 5, 70, "Text",ExpressionUUID->"f0811676-1b9c-47e7-9d6f-625b7cda2908"],
+Cell[5123333, 88582, 914, 25, 70, "Input",ExpressionUUID->"9e5d75a5-1357-4f34-b9f1-b569c362d4d0"],
+Cell[5124250, 88609, 346, 5, 70, "Text",ExpressionUUID->"d89f3803-c1b7-4043-878f-c46a0bedc7db"],
+Cell[5124599, 88616, 386, 10, 70, "Input",ExpressionUUID->"a061bc2d-8949-4008-991e-cb6b44720551"],
+Cell[5124988, 88628, 86, 0, 70, "Output",ExpressionUUID->"0830f83f-0976-4930-8c62-2af087b53a15"],
+Cell[5125077, 88630, 1135, 31, 70, "Input",ExpressionUUID->"bc3785c7-3cd3-4768-9fb0-21944e20eeee"],
+Cell[5126215, 88663, 337, 5, 70, "Text",ExpressionUUID->"6efcf599-4ece-4a01-828a-272403721fe5"],
+Cell[5126555, 88670, 739, 21, 70, "Input",ExpressionUUID->"2f3dce78-7544-49c5-92e3-aeceb1cd2fd6"],
+Cell[5127297, 88693, 367, 5, 70, "Text",ExpressionUUID->"af4d1984-6be8-46c0-b5f9-b505d8bc3a7f"],
+Cell[5127667, 88700, 4640, 125, 70, "Input",ExpressionUUID->"ef86b71d-e269-4a09-93f9-cf446c82e813"],
+Cell[5132310, 88827, 543, 13, 70, "Input",ExpressionUUID->"4b19b001-d93f-440f-8a18-0af3cd5e6166"],
+Cell[5132856, 88842, 83, 0, 70, "Output",ExpressionUUID->"375fd998-30f5-4d84-a6d4-5c10e334caa7"],
+Cell[5132942, 88844, 195, 3, 70, "Text",ExpressionUUID->"da2bd513-ecfa-42aa-ab90-e7463aa21d4c"],
+Cell[5133140, 88849, 1216, 32, 70, "Input",ExpressionUUID->"3a3d96ba-8c69-4f78-b2a6-bd0ab99a2bf1"],
+Cell[5134359, 88883, 1404, 29, 70, "Output",ExpressionUUID->"4ed6e979-e351-4363-8bf6-645f7f37fd41"],
+Cell[5135766, 88914, 118, 0, 70, "Text",ExpressionUUID->"2966ff6b-a681-4ea6-88cf-c61fedc2e2a6"],
+Cell[5135887, 88916, 1234, 34, 70, "Input",ExpressionUUID->"23d19338-4c51-494c-8d64-fd102eeac2f9"],
+Cell[5137124, 88952, 622, 12, 70, "Output",ExpressionUUID->"eeae1450-57ab-45e2-a7fb-fba05f7b7536"],
+Cell[5137749, 88966, 617, 9, 70, "Text",ExpressionUUID->"d17e1500-0f68-4c46-bd06-69810b972511"]
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[5118121, 88434, 166, 3, 70, "Section",ExpressionUUID->"4cbe0763-3c76-44ca-804d-f90eb8e47607"],
+Cell[5138403, 88980, 154, 3, 70, "Chapter",ExpressionUUID->"39897350-5dd2-48ef-8052-4f600a59f43f"],
 Cell[CellGroupData[{
-Cell[5118312, 88441, 5883, 156, 70, "Input",ExpressionUUID->"18eb52fa-65d6-4912-b6cd-43fb3c274110",
+Cell[5138582, 88987, 166, 3, 70, "Section",ExpressionUUID->"4cbe0763-3c76-44ca-804d-f90eb8e47607"],
+Cell[CellGroupData[{
+Cell[5138773, 88994, 5880, 155, 70, "Input",ExpressionUUID->"18eb52fa-65d6-4912-b6cd-43fb3c274110",
  InitializationCell->True],
-Cell[5124198, 88599, 709, 15, 70, "Message",ExpressionUUID->"b89d9409-0a26-434d-99a8-8aa2761b79ad"]
+Cell[5144656, 89151, 709, 15, 70, "Message",ExpressionUUID->"b89d9409-0a26-434d-99a8-8aa2761b79ad"]
 }, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[5124956, 88620, 161, 3, 70, "Section",ExpressionUUID->"c6f55b19-b02b-4580-9566-b997dc178ea3"],
-Cell[5125120, 88625, 778, 23, 70, "Input",ExpressionUUID->"2d90153d-280d-4f46-822e-ac7958e9e04f",
+Cell[5145414, 89172, 161, 3, 70, "Section",ExpressionUUID->"c6f55b19-b02b-4580-9566-b997dc178ea3"],
+Cell[5145578, 89177, 778, 23, 70, "Input",ExpressionUUID->"2d90153d-280d-4f46-822e-ac7958e9e04f",
  InitializationCell->True],
-Cell[5125901, 88650, 1277, 34, 70, "Input",ExpressionUUID->"75317886-a7d9-42b2-80c3-9ca55fecdf3c",
+Cell[5146359, 89202, 1277, 34, 70, "Input",ExpressionUUID->"75317886-a7d9-42b2-80c3-9ca55fecdf3c",
  InitializationCell->True],
-Cell[5127181, 88686, 5375, 125, 70, "Input",ExpressionUUID->"92d922b0-852c-4a8c-b3d2-7d77489995a1",
+Cell[5147639, 89238, 5375, 125, 70, "Input",ExpressionUUID->"92d922b0-852c-4a8c-b3d2-7d77489995a1",
  InitializationCell->True]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[5132593, 88816, 154, 3, 70, "Section",ExpressionUUID->"c0cbc1ca-3dc5-49d6-9169-9d966a028f7a"],
-Cell[5132750, 88821, 619, 18, 70, "Input",ExpressionUUID->"ab966532-ce71-4e80-9083-75232de48ac2",
+Cell[5153051, 89368, 154, 3, 70, "Section",ExpressionUUID->"c0cbc1ca-3dc5-49d6-9169-9d966a028f7a"],
+Cell[5153208, 89373, 619, 18, 70, "Input",ExpressionUUID->"ab966532-ce71-4e80-9083-75232de48ac2",
  InitializationCell->True],
-Cell[5133372, 88841, 1214, 33, 70, "Input",ExpressionUUID->"761debbb-ff20-4d23-8756-b3ac6eeef16c",
+Cell[5153830, 89393, 1214, 33, 70, "Input",ExpressionUUID->"761debbb-ff20-4d23-8756-b3ac6eeef16c",
  InitializationCell->True],
-Cell[5134589, 88876, 1435, 36, 70, "Input",ExpressionUUID->"bbd2aa54-eb5a-4b95-9d4e-9a6ba49ba251",
+Cell[5155047, 89428, 1435, 36, 70, "Input",ExpressionUUID->"bbd2aa54-eb5a-4b95-9d4e-9a6ba49ba251",
  InitializationCell->True],
-Cell[5136027, 88914, 880, 24, 70, "Input",ExpressionUUID->"766c3832-0ecd-4b44-96d5-2aeba1dad837",
- InitializationCell->True],
-Cell[CellGroupData[{
-Cell[5136932, 88942, 166, 3, 70, "Subsection",ExpressionUUID->"33308bb1-33c0-4824-b76c-13e99160eb72"],
-Cell[5137101, 88947, 5537, 127, 70, "Input",ExpressionUUID->"23c16224-e9eb-4939-b16b-07d2c8bf65a0",
- InitializationCell->True],
-Cell[5142641, 89076, 1378, 34, 70, "Input",ExpressionUUID->"741e61ec-803d-42f1-9d61-08887a08b60d",
+Cell[5156485, 89466, 880, 24, 70, "Input",ExpressionUUID->"766c3832-0ecd-4b44-96d5-2aeba1dad837",
  InitializationCell->True],
 Cell[CellGroupData[{
-Cell[5144044, 89114, 162, 3, 70, "Subsubsection",ExpressionUUID->"0e730cc4-7198-4ef7-b447-fd47439c12f4"],
-Cell[5144209, 89119, 4782, 125, 70, "Input",ExpressionUUID->"1baaa00d-caa6-46cc-acd2-7e518fe8efaf",
+Cell[5157390, 89494, 166, 3, 70, "Subsection",ExpressionUUID->"33308bb1-33c0-4824-b76c-13e99160eb72"],
+Cell[5157559, 89499, 5537, 127, 70, "Input",ExpressionUUID->"23c16224-e9eb-4939-b16b-07d2c8bf65a0",
+ InitializationCell->True],
+Cell[5163099, 89628, 1378, 34, 70, "Input",ExpressionUUID->"741e61ec-803d-42f1-9d61-08887a08b60d",
+ InitializationCell->True],
+Cell[CellGroupData[{
+Cell[5164502, 89666, 162, 3, 70, "Subsubsection",ExpressionUUID->"0e730cc4-7198-4ef7-b447-fd47439c12f4"],
+Cell[5164667, 89671, 4782, 125, 70, "Input",ExpressionUUID->"1baaa00d-caa6-46cc-acd2-7e518fe8efaf",
  InitializationCell->True]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[5149028, 89249, 216, 4, 70, "Subsubsection",ExpressionUUID->"90f4f7a8-a7ed-487d-b317-f99a649e34c1"],
-Cell[5149247, 89255, 3245, 86, 70, "Input",ExpressionUUID->"7180029d-aa35-407e-8d0d-2517c2f96f77",
+Cell[5169486, 89801, 216, 4, 70, "Subsubsection",ExpressionUUID->"90f4f7a8-a7ed-487d-b317-f99a649e34c1"],
+Cell[5169705, 89807, 3245, 86, 70, "Input",ExpressionUUID->"7180029d-aa35-407e-8d0d-2517c2f96f77",
  InitializationCell->True]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[5152529, 89346, 262, 4, 70, "Subsubsection",ExpressionUUID->"f4abf539-1a75-479e-9582-0f4226401bd4"],
-Cell[5152794, 89352, 5480, 129, 70, "Input",ExpressionUUID->"1a5a6a5d-69ca-4938-a7e0-1af0f6c0258a",
+Cell[5172987, 89898, 262, 4, 70, "Subsubsection",ExpressionUUID->"f4abf539-1a75-479e-9582-0f4226401bd4"],
+Cell[5173252, 89904, 5480, 129, 70, "Input",ExpressionUUID->"1a5a6a5d-69ca-4938-a7e0-1af0f6c0258a",
  InitializationCell->True]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[5158311, 89486, 166, 3, 70, "Subsubsection",ExpressionUUID->"0023308c-f849-4b35-a163-afda23624cff"],
-Cell[5158480, 89491, 4591, 120, 70, "Input",ExpressionUUID->"9a4ada89-548e-4b0d-9fdb-f222e1752e08",
+Cell[5178769, 90038, 166, 3, 70, "Subsubsection",ExpressionUUID->"0023308c-f849-4b35-a163-afda23624cff"],
+Cell[5178938, 90043, 4591, 120, 70, "Input",ExpressionUUID->"9a4ada89-548e-4b0d-9fdb-f222e1752e08",
  InitializationCell->True]
 }, Closed]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[5163120, 89617, 218, 4, 70, "Subsection",ExpressionUUID->"d83766d3-0a88-4eed-adb5-0cc1e60324ca"],
-Cell[5163341, 89623, 1568, 41, 70, "Input",ExpressionUUID->"8dfe3117-bf00-4a88-8bda-d424516c5061",
+Cell[5183578, 90169, 218, 4, 70, "Subsection",ExpressionUUID->"d83766d3-0a88-4eed-adb5-0cc1e60324ca"],
+Cell[5183799, 90175, 1568, 41, 70, "Input",ExpressionUUID->"8dfe3117-bf00-4a88-8bda-d424516c5061",
  InitializationCell->True],
-Cell[5164912, 89666, 448, 11, 70, "Input",ExpressionUUID->"a9918bff-4faa-4d03-a8d7-40f10bd4ca46",
+Cell[5185370, 90218, 448, 11, 70, "Input",ExpressionUUID->"a9918bff-4faa-4d03-a8d7-40f10bd4ca46",
  InitializationCell->True],
-Cell[5165363, 89679, 1169, 28, 70, "Input",ExpressionUUID->"cdecf080-d45a-461e-876b-9c19ccf45bcc",
+Cell[5185821, 90231, 1169, 28, 70, "Input",ExpressionUUID->"cdecf080-d45a-461e-876b-9c19ccf45bcc",
  InitializationCell->True]
 }, Open  ]]
 }, Open  ]]
