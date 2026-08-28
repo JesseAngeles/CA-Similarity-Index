@@ -1,0 +1,114 @@
+\documentclass[a4paper,11pt]{article}
+
+% ---- Style reference: Template_Abstract.pdf (Indian Summer School on
+% Cellular Automata) -- banner header with logo, rule, title block,
+% two-column body, footer rule with acknowledgment + page number. ----
+
+\usepackage[margin=2cm,headheight=0pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{mathptmx} % Times-like text/math, close to the reference PDF
+\usepackage{comment}
+
+\definecolor{bannergray}{gray}{0.45}
+
+% ---- Fields to edit per submission ----
+\newcommand{\EventYear}{2026}
+\newcommand{\SubmissionDate}{\today}
+\newcommand{\PaperTitle}{Similarity Index of Cellular Automata}
+\newcommand{\AuthorList}{Erick Jesse Angeles López}
+\newcommand{\Affiliation}{}
+% Optional second author line, e.g. mentor/advisor -- leave empty to omit.
+\newcommand{\MentorLine}{Mentor: Sukanta Das}
+\newcommand{\Acknowledgment}{We thank the organizers and reviewers of the Indian Summer School on Cellular Automata for their feedback.}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.6pt}
+\fancyfoot[L]{\footnotesize \Acknowledgment}
+\fancyfoot[R]{\footnotesize\thepage}
+
+\setlength{\columnsep}{22pt}
+
+% \twocolumn[...] scans for the first literal "]" without understanding
+% nested optional arguments, so \includegraphics[...] / minipage[c] must
+% be hidden inside a macro (expanded only once \twocolumn typesets it).
+\newcommand{\PaperHeader}{%
+  \begin{minipage}{\textwidth}
+    {\Large\itshape\color{bannergray} Indian Summer School on Cellular Automata \EventYear}
+
+    \vspace{6pt}
+    \noindent\rule{\textwidth}{1pt}
+    \vspace{12pt}
+
+    \begin{minipage}[t]{0.76\textwidth}
+      {\LARGE\bfseries \PaperTitle}\par
+      \vspace{6pt}
+      {\large \AuthorList}\par
+      \ifx\MentorLine\empty\else {\large \MentorLine}\par\fi
+      \vspace{4pt}
+      {\small \Affiliation}\par
+      \vspace{4pt}
+      \SubmissionDate\par
+    \end{minipage}%
+    \hfill
+    
+    %\begin{minipage}[t]{0.2\textwidth}
+     %\raggedleft\includegraphics[width=2.6cm]{logo.png}
+    %\end{minipage}
+
+    \vspace{10pt}
+    \noindent\rule{\textwidth}{0.6pt}
+    \vspace{14pt}
+  \end{minipage}%
+}
+
+\begin{document}
+
+\twocolumn[\PaperHeader]
+
+Los autómatas celulares han servido para modelar sistemas complejos \cite{Torres2025_complejo, sole1996_cs_caos, Hoekstra2010_cs_ca}, desde la biología hasta la economía \cite{Zelinka2014_cs, Zelinka2018_cs}. Para un mismo problema pueden existir varios autómatas celulares capaces de representarlo y, entre más complejo es el sistema, más alternativas aparecen al momento de simplificarlo. Algo similar ocurre con el Juego de la Vida \cite{lifewiki_life}: junto a la regla propuesta por John Conway existe una familia de reglas, llamadas \textit{life-like}, que exhiben un comportamiento parecido. Pero, ¿qué tanto se parecen? ¿Existe una regla que se parezca más y otra que se parezca menos? El objetivo de esta investigación es definir una medida de similitud que asigne un valor numérico a qué tan parecidas son dos reglas dadas con base en su evolución, en lugar de depender únicamente de si lucen ``parecidas'' visualmente.
+
+Como primer resultado se identificaron cuatro relaciones que conectan reglas de definiciones distintas, es decir, autómatas celulares que no solo difieren en el número de regla, sino también en la vecindad o en el número de estados: la permutación de estados y las reglas espejo (relaciones bien conocidas que reducen el espacio de análisis; en ECA, de 256 reglas a solo 88 \cite{genaro2013_class}), junto con dos relaciones nuevas que mapean similitud entre definiciones: la eliminación de vecinos (cuando el valor de un vecino no influye en la función de transición, puede eliminarse y el comportamiento se conserva con una vecindad menor) y la eliminación de estados (cuando un estado nunca es producido y su única posibilidad de aparecer es la condición inicial). Aplicando estas cuatro reducciones de forma iterativa se construye un grafo de conexiones en el que la ruta mínima entre dos reglas mide qué tan separadas están; con ello se demuestra que existen reglas cuyo comportamiento es el mismo incluso en espacios diferentes.
+
+El segundo método construye el grafo de transiciones del autómata celular, donde cada nodo representa una configuración y cada arista la transición de esa configuración a la siguiente. Su forma canónica permite decidir si dos reglas son estructuralmente iguales ignorando el nombre de los nodos, pero solo ofrece una comparación binaria (son iguales o no lo son), por lo que no sirve como medida graduada de similitud.
+
+El tercer método calcula los valores propios de la matriz de adyacencia del grafo (con algunas adecuaciones, pues la matriz no es simétrica) y los usa como vector de características, midiendo la distancia coseno entre dos reglas. Sin embargo, solo funciona para reglas del mismo espacio: el número de valores propios depende del número de nodos, así que no es posible comparar, por ejemplo, reglas de 2 y de 3 estados.
+
+Para corregir este problema se definió el método de momentos espectrales: dado un $n$, se evoluciona el sistema $n$ pasos y en cada paso se cuenta la proporción de configuraciones que regresaron a su estado original. Este vector de conteos tiene una longitud fija que depende del rango de pasos elegido y no del número de nodos del grafo, por lo que sí permite comparar reglas de espacios distintos usando nuevamente la distancia coseno.
+
+Aplicamos este método de momentos espectrales al Juego de la Vida de Conway bajo dos experimentos. En una malla toroidal exacta de $4\times4$ (16 celdas) comparamos la regla estándar Life (B3/S23) con dos variantes de vecindad de Moore, Life+S8 (B3/S238) y Life+B8 (B38/S23); Life y Life+B8 obtuvieron vectores idénticos (distancia coseno 0), mientras que Life+S8 difirió ligeramente de ambas (distancia 0.0005), lo cual sugiere que modificar la condición de supervivencia tiene mayor impacto estructural que modificar la de nacimiento. En un segundo experimento, sobre una malla toroidal de $6\times6$ (36 celdas, donde el grafo exacto es inviable por sus $2^{36}$ configuraciones) muestreamos 3000 configuraciones iniciales por regla, con un transitorio de 200 pasos y un límite de 150 pasos para detectar el periodo de retorno, comparando Life, HighLife (B36/S23), Seeds (B2/S) y dos reglas de vecindad de Von Neumann (B2/S12 y B13/S2). Cuatro de las cinco reglas ---las tres de Moore y Von Neumann B2/S12--- se agruparon entre sí con distancias coseno de entre 0.0001 y 0.0065, mientras que Von Neumann B13/S2 quedó claramente aislada del resto (distancias de entre 0.056 y 0.095): la similitud detectada no depende únicamente del tipo de vecindad, sino de la dinámica particular de cada regla. Adicionalmente, comparamos este experimento sobre el espacio de configuraciones sin cocientar (\textit{raw}) contra el mismo método cocientando por rotaciones: para 4 de las 5 reglas ambos producen vectores casi idénticos (distancia menor a 0.00023), lo que sugiere que cocientar por rotaciones es una simplificación computacional segura que no compromete el poder de distinción. La excepción es de nuevo Von Neumann B13/S2, cuya distancia \textit{raw} contra cocientado fue mayor (0.026) y que además presentó una fracción notable (23.7\%) de muestras cuyo periodo de retorno no se resolvió dentro del límite de pasos considerado.
+
+Aplicamos también los momentos espectrales a las 256 reglas ECA (grafo cocientado por rotaciones, 14 células, 10 pasos): solo 63 vectores son distintos. El clustering produce 14 grupos con distancia euclidiana y 3 con coseno (uno concentra las reglas caóticas y complejas conocidas), pero la distinción no es nítida (silhouette 0.254; 71 reglas tienen un vecino de otro grupo a menos de 0.01): es más un espectro continuo que clases separadas.
+
+Finalmente, pusimos a prueba la medida en un escenario tomado de una línea de investigación distinta: la evolución adaptativa en autómatas celulares totalísticos \cite{angeles2025_aetca}, que estudia las reglas que producen \textit{lifeforms} finitos (patrones que, a partir de una sola célula activa, crecen y mueren por completo) y plantea que todas ellas están conectadas mediante mutaciones de un solo dígito de la regla. En ese espacio ($k=3$, $r=1$) confirmamos la conectividad ---las 45 reglas (de 729) con \textit{lifeform} finito forman una única componente conexa---, pero su distancia coseno espectral no muestra tendencia con la distancia de mutación (Spearman $0.006$); incluso pares con evolución idéntica alcanzan distancias de 0.276. La razón: los \textit{lifeforms} analizan una sola condición inicial y los momentos espectrales todas.
+
+Queda por determinar el tamaño mínimo de espacio o ventana de contexto que preserva la información distintiva entre reglas sin incurrir en costos computacionales innecesarios, pregunta que surge al notar que, para autómatas celulares elementales, un contexto de apenas 4 celdas ya permite distinguir casi todos los comportamientos conocidos. También es necesario extender la validación de la medida a otras dimensiones y tamaños de espacio, por ejemplo mallas mayores a $4\times 4$ o autómatas celulares en 3 dimensiones, para confirmar que generaliza más allá del caso 2D estudiado. En particular, se requieren más experimentos en 2D para contrastar lo observado en el primer experimento con Life: la sugerencia de que modificar las condiciones de supervivencia tiene mayor impacto estructural que modificar las de nacimiento proviene de una única malla exacta de $4\times4$, una evidencia demasiado pequeña para una afirmación tan general, por lo que debe verificarse en mallas mayores empleando la técnica de muestreo ya utilizada (configuraciones iniciales aleatorias con un transitorio de pasos y un límite para detectar el periodo de retorno) sobre más variantes de nacimiento y supervivencia. Asimismo, queda por investigar los casos cuyo periodo de retorno no se resuelve dentro del límite de pasos considerado, lo que podría indicar dinámicas caóticas o de periodo muy largo. Finalmente, dado que el grafo de transiciones crece exponencialmente con el número de celdas y de estados, se requieren métodos de optimización ---muestreo más eficiente, aproximaciones del espectro o reducciones adicionales del grafo--- que permitan aplicar esta medida de similitud a autómatas celulares de gran escala.
+
+% ---- Optional figure, following the reference PDF's style ----
+% \begin{figure}[t]
+%   \centering
+%   \includegraphics[width=\linewidth]{figure1.png}
+%   \caption{(a), (b) Evolution graph for two ECA rules before and
+%     after rotation quotienting; (c) cosine distance between adjacency
+%     eigenvalues across the 256 ECA rules.}
+%   \label{fig:evolution-graph}
+% \end{figure}
+
+{\footnotesize
+\begin{thebibliography}{9}\setlength{\itemsep}{1pt}\setlength{\parsep}{0pt}
+\bibitem{Torres2025_complejo} J. Torres. \textit{Introducción a los sistemas complejos}. Universidad de Granada, 2025.
+\bibitem{sole1996_cs_caos} R. V. Solé, S. C. Manrubia. \textit{Orden y caos en sistemas complejos}. Edicions UPC, Barcelona, 1996.
+\bibitem{Hoekstra2010_cs_ca} A. Hoekstra, J. Kroc, P. Sloot. ``Introduction to Modeling of Complex Systems Using Cellular Automata.'' In \textit{Simulating Complex Systems by Cellular Automata}, pp.\ 1--16, 2010.
+\bibitem{Zelinka2014_cs} I. Zelinka, A. Sanayei, H. Zenil, O. E. Rössler. \textit{How Nature Works}. Springer International Publishing, Heidelberg, 2014.
+\bibitem{Zelinka2018_cs} I. Zelinka, J. Burguillo. ``Complex Systems.'' 2018, pp.\ 11--34.
+\bibitem{lifewiki_life} LifeWiki. \textit{Conway's Game of Life}. conwaylife.com/wiki/Conway's\_Game\_of\_Life.
+\bibitem{genaro2013_class} G. J. Martinez. ``A Note on Elementary Cellular Automata Classification.'' \textit{Journal of Cellular Automata}, vol.\ 8, 2013.
+\bibitem{angeles2025_aetca} E. J. Angeles L\'opez. ``Adaptative Evolution in Totalistic Cellular Automaton.'' \textit{Wolfram Community}, 2025. community.wolfram.com/groups/-/m/t/3496929.
+\end{thebibliography}
+}
+
+\end{document}
