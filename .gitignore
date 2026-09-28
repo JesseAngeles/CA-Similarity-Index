@@ -17,6 +17,3 @@
 
 # Backups generados automáticamente
 *_backup_*.nb
-
-# Salidas compiladas de LaTeX
-**/build/*.pdf
