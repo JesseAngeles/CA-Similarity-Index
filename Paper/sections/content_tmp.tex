@@ -1,0 +1,53 @@
+\subsection{Otros metodos de similitud exacta}
+
+Si definimos un tamaño de espaci oque contenga $n$ celulas, entonces existen $|\mathcal{S}|^n$ posibles configuraciones, si representamos cada una de ellas como un nodo de un grafo, al evolucionar todas ellas obtendremos el grafo de evolución de una regla bajo todas las finitas configuraciones posibles. 
+
+Con este método podemos decir si dos reglas son identicas mediante dos formas, mediante una comparación isomorfica, o mediante la comparación de las formas canonicas. Basicamente, identificamos si la topologia de ambos es la misma. 
+
+Estos metodos de similitud tiene dos restriciones principales:
+\begin{enumerate}
+	\item Su medida de similitud sigue siendo binaria
+	\item Depende del tamaño de la vecindad. 
+\end{enumerate}
+
+Mediante isomorfismo, realizamos un mapeo de los nombres de los nodos y si corresponden, entonces podemos asumir que son identicos.
+
+
+
+Por ejemplo, el tamaño influye en el numero de comportamientos posibles por replicar. 
+
+El metodo de inheritance propoerties sigue siendo mejor para definir la exactitud, ademas, este metodo nos obliga a realizar la operación de comparacion isomorfica que es costosa computacional. Una alternativa es defininar la forma canonica de cada grafo mediante el siguiente algoritmo:
+
+\begin{enumerate}
+	\item We remove every leaf node and add it to a queue
+	\item For each leaf node we create a code relating it to its parent node, and remove the node
+	\item \item Si el nodo padre se convierte en un nodo hoja lo eliminamos y se añade a la cola
+	\item Once all leaf nodes are processed, the resulting cycles are encoded
+	
+\end{enumerate}
+
+Este metodo nos permite identificar las formas canonicas unicas dentro de un conjunto de reglas. Esto reduce la complejidad computacional y nos permite identificar todas la expresión de las reglas en un espacio finito, si coincide entonces decimos que 2 reglas sin las mismas. 
+
+TODO: ejemplo: Aqui se tiene que poner la tabla o el grafico de como incrementa el numero de comportamientos únicos según las medidas de similitud (no de reducción) conforme se va incrementando el numero de estados.
+
+\subsection{EigenValues}
+
+para este metodo calculamos los eigenvalues de la matriz de transición y los usamos como embedding de dicha regla, la cual podemos luego comparar mediante la función coseno. 
+
+Pero ¿Que significan los EigenValues dentro del grafo de evolución? y ¿Porque nos sirven para identificar si 2 reglas son similares?
+
+Nosotros generamo una matriz de transición no simetrica, al calcular lo EigenValues es posible que obtengamos valores en el espacio complejo. Estos son usados según la teoria espectral de grafos y permiten extraer la huella "dactilar" o estructural o la firma de resonancia de dicha red.
+
+La matriz al no ser simetrica produce eigenvalues complejos $a + b \imath$ donde:
+
+\begin{itemize}
+	\item La parte real $Re{\lambda}$ mide que tan fuertes estan conectadas los nodos
+	\item La parte imaginaria $Im(\lambda)$ captura la existencia de bucles o flujos unidireccionales, si el grafo fuera simetrico esto seria 0.
+\end{itemize}
+
+Usamos los eigenvalues porque funciona como un conteo de frecuencias, es decir, 2 grafos que son isomorficos o que comprten su forma canonica produciran los mismos eigenvalues (despues de ordenarlos), si esto ocurre, podemos asumir que son idénticos, en caso contrario, usamos los eigenvalues para medir la similitud usando la distancia coseno. 
+
+utilizando este metodo, logramos conseguir 74 comportamientos unicos con un espacio de 18 celulas. Si revisamos la grafica 
+
+
+

@@ -1,0 +1,574 @@
+<title>Similarity Index of Cellular Automata</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --ground:#DFE4E8; --plate:#FFFFFF; --ink:#10161C; --ink2:#56636E;
+  --rule:#B9C2C9; --hair:#D5DCE1; --signal:#B4231B; --signal2:#3F7A46;
+  --disp:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --body:'IBM Plex Sans','Helvetica Neue',Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
+  -webkit-font-smoothing:antialiased}
+a{color:var(--signal)}a:hover{color:#8A1A14}
+
+.app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.stage{flex:1 1 auto;position:relative;display:grid;place-items:center;min-height:0;padding:16px}
+.deck{width:1280px;height:720px;position:relative;transform-origin:center center;
+  background:var(--plate);box-shadow:0 1px 0 var(--hair),0 18px 48px rgba(16,22,28,.13)}
+.slide{position:absolute;inset:0;padding:64px 72px 74px 72px;background:var(--plate);
+  opacity:0;visibility:hidden;transition:opacity .2s ease}
+.slide.on{opacity:1;visibility:visible}
+
+/* diapositivas oscuras: portada y cierre */
+.slide.ink{
+  --plate:#10161C; --ink:#F4F6F8; --ink2:#8D99A3;
+  --hair:#2A333C; --rule:#39434D; --signal:#E06A5C;
+  color:var(--ink);
+}
+.slide.ink p{color:#A9B4BD}
+.slide.ink p.lead{color:var(--ink)}
+.slide.ink .slug{color:#5C6872}
+.slide.ink .slug .n{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+/* rotulo pequeno en mono (solo la portada lo conserva) */
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--signal);margin:0 0 14px 0}
+/* titulo de diapositiva: antes era el rotulo rojo; hereda la tipografia del h1 eliminado */
+.eyebrow{font-family:var(--disp);font-variation-settings:'wdth' 116,'wght' 780;
+  font-size:42px;line-height:1.04;letter-spacing:-.018em;color:var(--ink);
+  margin:0 0 22px 0;max-width:30ch;text-wrap:balance}
+h1{font-family:var(--disp);font-variation-settings:'wdth' 116,'wght' 780;
+  font-size:42px;line-height:1.04;letter-spacing:-.018em;margin:0 0 20px 0;text-wrap:balance}
+h2{font-family:var(--disp);font-variation-settings:'wdth' 108,'wght' 640;
+  font-size:17px;line-height:1.18;letter-spacing:-.006em;margin:0 0 6px 0}
+p{font-size:16px;line-height:1.55;margin:0 0 12px 0;color:#2C363E;max-width:62ch;text-wrap:pretty}
+p.lead{color:var(--ink);font-weight:500}
+p.aside{font-size:14px;color:var(--ink2)}
+em{font-style:italic}
+.m{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.cap{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink2);margin:7px 0 0 0;
+  line-height:1.45;max-width:none}
+.hair{border:0;border-top:1px solid var(--hair);margin:0}
+
+.fig{background:var(--plate);border:1px solid var(--hair);padding:11px;display:flex;
+  align-items:center;justify-content:center}
+.fig img{display:block;max-width:100%;height:auto}
+.row{display:flex;gap:40px;align-items:flex-start}
+.note{border-left:3px solid var(--signal);padding:2px 0 2px 15px}
+.note p{margin:0;font-size:15px;max-width:none}
+.stat{font-family:var(--mono);font-size:23px;font-weight:500;letter-spacing:-.01em}
+.swatch{width:12px;height:12px;flex:0 0 auto}
+.legend{display:flex;gap:20px;margin-top:10px;font-family:var(--mono);font-size:12px}
+.legend span{display:flex;align-items:center;gap:7px}
+.tbl{display:flex;flex-direction:column;border-top:1px solid var(--hair)}
+.tbl div{display:flex;justify-content:space-between;gap:16px;padding:10px 0;
+  border-bottom:1px solid var(--hair);font-size:15px;align-items:baseline}
+/* bloque de definicion sobre fondo oscuro: redefine las variables en el
+   propio bloque para que los estilos inline de dentro (var(--signal), etc.)
+   se adapten sin tocarlos uno por uno */
+.def{--ink:#F4F6F8; --ink2:#8D99A3; --hair:#2A333C; --signal:#E06A5C;
+  background:#10161C; color:var(--ink); padding:20px 24px}
+.def p{color:#A9B4BD}
+
+.slug{position:absolute;left:72px;right:72px;bottom:28px;display:flex;gap:14px;
+  align-items:baseline;font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;
+  color:#8695A0;text-transform:uppercase}
+.slug .n{color:var(--ink);font-weight:500}
+.slug .sp{flex:1 1 auto;border-bottom:1px solid var(--hair);transform:translateY(-3px)}
+
+.bar{flex:0 0 auto;display:flex;justify-content:center;padding:9px 18px 13px;
+  border-top:1px solid var(--hair);background:var(--ground);
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;color:var(--ink2);
+  font-variant-numeric:tabular-nums}
+.bar b{color:var(--ink);font-weight:500}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+@media print{
+  @page{size:1280px 720px;margin:0}
+  .bar{display:none!important}
+  .app{height:auto;overflow:visible}
+  .stage{display:block;padding:0}
+  .deck{transform:none!important;width:1280px;height:auto;box-shadow:none}
+  .slide{position:relative;inset:auto;opacity:1!important;visibility:visible!important;
+    width:1280px;height:720px;page-break-after:always;break-after:page}
+}
+</style>
+
+<div class="app">
+  <div class="stage" id="stage">
+    <div class="deck" id="deck">
+
+<!-- 01 -->
+<section class="slide ink" data-name="Title">
+  <div style="display:flex;flex-direction:column;height:100%;justify-content:space-between">
+    <div>
+      <p class="kicker" style="margin-bottom:38px">Indian Summer School on Cellular Automata &middot; 2026</p>
+      <h1 style="font-size:82px;max-width:14ch;margin-bottom:40px">Similarity Index of Cellular Automata</h1>
+      <div style="display:flex;gap:44px;align-items:baseline">
+        <div><div style="font-size:19px;font-weight:600">Erick Jesse Angeles Lopez</div>
+          <div class="m" style="font-size:12px;color:var(--ink2);margin-top:5px;letter-spacing:.1em">AUTHOR</div></div>
+        <div style="width:1px;height:38px;background:var(--hair)"></div>
+        <div><div style="font-size:19px;font-weight:600">Sukanta Das</div>
+          <div class="m" style="font-size:12px;color:var(--ink2);margin-top:5px;letter-spacing:.1em">MENTOR</div></div>
+      </div>
+    </div>
+    <div style="margin:0 -72px -74px -72px">
+      <div class="m" style="padding:0 72px 10px;font-size:10.5px;letter-spacing:.11em;
+        color:var(--ink2);text-transform:uppercase">Rule 110 &middot; cyclic space &middot; 44 steps</div>
+      <img src="img/banner.png" alt="" style="display:block;width:1280px;height:142px;object-fit:cover">
+    </div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="slide" data-name="The problem">
+  <p class="eyebrow">The problem</p>
+  <div class="fig"><img src="img/lifelike.png" alt="Life, HighLife and Seeds evolved from the same random grid" style="width:1030px"></div>
+  <div class="row" style="margin-top:20px;gap:56px">
+    <p style="flex:1 1 0;margin:0;max-width:none">The same random 64&times;64 torus, 24 steps, three rules. Side by side, nothing says which pair is closest.</p>
+    <p class="lead" style="flex:1 1 0;margin:0;max-width:none">The question is not <em>are these rules equal</em>. It is <em>how far apart are they</em>, and that answer has to be a number.</p>
+  </div>
+  <div class="slug"><span class="n">02</span><span>The problem</span><span class="sp"></span></div>
+</section>
+
+<!-- 03 -->
+<section class="slide" data-name="Five methods">
+  <p class="eyebrow">The route</p>
+  <div style="display:flex;gap:16px;margin-top:24px">
+    <div style="flex:1 1 0;border-top:2px solid var(--rule);padding-top:13px">
+      <div class="m" style="font-size:11.5px;color:var(--ink2);letter-spacing:.13em">01</div>
+      <h2 style="margin-top:8px">Similar behaviour</h2>
+      <p style="font-size:13.5px;margin:0;line-height:1.45;max-width:none">Which rules already <em>are</em> the same rule, even across different definitions.</p>
+      <div class="m" style="font-size:11px;color:var(--signal);margin-top:11px">YES / NO</div>
+    </div>
+    <div style="flex:1 1 0;border-top:2px solid var(--rule);padding-top:13px">
+      <div class="m" style="font-size:11.5px;color:var(--ink2);letter-spacing:.13em">02</div>
+      <h2 style="margin-top:8px">Isomorphic</h2>
+      <p style="font-size:13.5px;margin:0;line-height:1.45;max-width:none">Compare the whole finite dynamics as a graph, labels thrown away.</p>
+      <div class="m" style="font-size:11px;color:var(--signal);margin-top:11px">YES / NO</div>
+    </div>
+    <div style="flex:1 1 0;border-top:2px solid var(--rule);padding-top:13px">
+      <div class="m" style="font-size:11.5px;color:var(--ink2);letter-spacing:.13em">03</div>
+      <h2 style="margin-top:8px">Canonical form</h2>
+      <p style="font-size:13.5px;margin:0;line-height:1.45;max-width:none">A printable code for that structure. Counts behaviours, ranks nothing.</p>
+      <div class="m" style="font-size:11px;color:var(--signal);margin-top:11px">YES / NO</div>
+    </div>
+    <div style="flex:1 1 0;border-top:2px solid var(--rule);padding-top:13px">
+      <div class="m" style="font-size:11.5px;color:var(--ink2);letter-spacing:.13em">04</div>
+      <h2 style="margin-top:8px">Eigenvalues</h2>
+      <p style="font-size:13.5px;margin:0;line-height:1.45;max-width:none">A real number at last, but the vector length is the node count.</p>
+      <div class="m" style="font-size:11px;color:var(--signal);margin-top:11px">ONE SPACE ONLY</div>
+    </div>
+    <div style="flex:1.14 1 0;border-top:2px solid var(--signal);padding-top:13px">
+      <div class="m" style="font-size:11.5px;color:var(--signal);letter-spacing:.13em">05</div>
+      <h2 style="margin-top:8px">Spectral moments</h2>
+      <p style="font-size:13.5px;margin:0;line-height:1.45;max-width:none;color:var(--ink)">Fixed length, chosen by us. Comparable across states, neighbourhoods and dimensions.</p>
+      <div class="m" style="font-size:11px;color:var(--signal2);margin-top:11px">A DISTANCE</div>
+    </div>
+  </div>
+  <div style="position:absolute;left:72px;right:72px;bottom:96px">
+    <hr class="hair">
+    <div style="display:flex;gap:36px;padding-top:14px">
+      <div class="m" style="font-size:11px;letter-spacing:.15em;color:var(--ink2);text-transform:uppercase;padding-top:3px;flex:0 0 auto">Then tested on</div>
+      <p style="margin:0;font-size:15px;max-width:none">All 256 elementary rules &nbsp;&middot;&nbsp; Conway's Life on an exact 4&times;4 torus &nbsp;&middot;&nbsp; five Moore and Von Neumann rules at 6&times;6 &nbsp;&middot;&nbsp; 45 totalistic rules linked by mutation</p>
+    </div>
+  </div>
+  <div class="slug"><span class="n">03</span><span>Five methods</span><span class="sp"></span></div>
+</section>
+
+<!-- 04 -->
+<section class="slide" data-name="Similar behaviour">
+  <p class="eyebrow">Method 01 &middot; similar behaviour</p>
+  <div class="row" style="gap:36px;align-items:flex-start">
+    <div style="flex:1.2 1 0">
+      <div class="fig" style="padding:10px"><img src="img/relations.png" alt="Rules 110, 137, 124 and 193 evolved from the same seed" style="width:100%"></div>
+      <div style="display:flex;gap:8px;margin-top:7px">
+        <div style="flex:1 1 0"><div class="m" style="font-size:12.5px;font-weight:500">110</div><div class="cap" style="margin-top:1px">original</div></div>
+        <div style="flex:1 1 0"><div class="m" style="font-size:12.5px;font-weight:500">137</div><div class="cap" style="margin-top:1px">state permutation</div></div>
+        <div style="flex:1 1 0"><div class="m" style="font-size:12.5px;font-weight:500">124</div><div class="cap" style="margin-top:1px">mirror</div></div>
+        <div style="flex:1 1 0"><div class="m" style="font-size:12.5px;font-weight:500">193</div><div class="cap" style="margin-top:1px">both</div></div>
+      </div>
+    </div>
+    <div style="flex:1 1 0;display:grid;grid-template-columns:1fr 1fr;gap:15px 22px">
+      <div style="border-top:2px solid var(--rule);padding-top:10px">
+        <h2 style="font-size:16px;margin-bottom:5px">State permutation</h2>
+        <p style="margin:0;font-size:13.5px;line-height:1.45;max-width:none">Relabel the states so every transition survives.</p>
+      </div>
+      <div style="border-top:2px solid var(--rule);padding-top:10px">
+        <h2 style="font-size:16px;margin-bottom:5px">Mirror</h2>
+        <p style="margin:0;font-size:13.5px;line-height:1.45;max-width:none">Reverse the neighbourhood; the evolution flips left to right.</p>
+      </div>
+      <div style="border-top:2px solid var(--signal);padding-top:10px">
+        <h2 style="font-size:16px;margin-bottom:5px">Neighbour reduction <span class="m" style="font-size:10px;color:var(--signal2);letter-spacing:.12em">NEW</span></h2>
+        <p style="margin:0;font-size:13.5px;line-height:1.45;max-width:none">A neighbour that never changes the outcome can be dropped.</p>
+      </div>
+      <div style="border-top:2px solid var(--signal);padding-top:10px">
+        <h2 style="font-size:16px;margin-bottom:5px">State reduction <span class="m" style="font-size:10px;color:var(--signal2);letter-spacing:.12em">NEW</span></h2>
+        <p style="margin:0;font-size:13.5px;line-height:1.45;max-width:none">A state that is never produced lives only in the initial condition.</p>
+      </div>
+    </div>
+  </div>
+  <div class="row" style="gap:36px;margin-top:20px;align-items:flex-start">
+    <div style="flex:1 1 0">
+      <div class="m" style="font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--signal);margin-bottom:7px">Neighbour reduction &middot; same evolution, fewer neighbours</div>
+      <div class="fig" style="padding:8px"><img src="img/neighred.png" alt="Rules 3 and 10 on two neighbours beside rules 1 and 2 on one neighbour" style="width:100%"></div>
+      <p class="cap">Left pair: 3<sub>2,2</sub> and 1<sub>2,1</sub> match once the blocks are shifted left. Right pair: 10<sub>2,2</sub> and 2<sub>2,1</sub> are identical outright.</p>
+    </div>
+    <div style="flex:1 1 0">
+      <div class="m" style="font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--signal);margin-bottom:7px">State reduction &middot; same evolution, fewer states</div>
+      <div class="fig" style="padding:8px"><img src="img/statered.png" alt="Rule 1 written with two, three, four, five and six states" style="width:100%"></div>
+      <p class="cap">Rule 1 with 2, 3, 4, 5 and 6 states, started from a row holding every state. After one step the extra states are gone for good.</p>
+    </div>
+  </div>
+  <p class="lead" style="margin:15px 0 0;max-width:none;font-size:15px">The first two are classical: together they collapse the <span class="m">256</span> elementary rules to <span class="m">88</span>. The last two are new, and they cross between definitions.</p>
+  <div class="slug"><span class="n">04</span><span>Similar behaviour</span><span class="sp"></span></div>
+</section>
+
+<!-- 05 -->
+<section class="slide" data-name="Similar behaviour, across spaces">
+  <p class="eyebrow">Method 01 &middot; across spaces</p>
+  <div class="row" style="gap:30px;align-items:flex-start">
+    <div style="flex:2.435 1 0">
+      <div class="fig" style="padding:10px"><img src="img/reduction.png" alt="Chain of rule reductions, every node labelled with its rule" style="width:100%"></div>
+      <p class="cap">Each node is a rule vector, labelled <span class="m">rule<sub>states,neighbours</sub></span>. Red deletes the last state, blue takes the minor inverse rule.</p>
+    </div>
+    <div style="flex:1.352 1 0">
+      <div class="fig" style="padding:10px"><img src="img/statespace3d.png" alt="Reduction network over every rule up to five states" style="width:100%"></div>
+      <p class="cap">The same two relations over every rule up to five states. One plane per state count.</p>
+    </div>
+  </div>
+  <div class="row" style="gap:40px;margin-top:20px;align-items:flex-start">
+    <div style="flex:1 1 0">
+      <p style="margin:0 0 10px;max-width:none">Apply the relations again and again and the rules stop being a flat list. They become a graph, with an edge wherever one rule reduces to another.</p>
+    </div>
+    <div style="flex:1 1 0">
+      <p class="lead" style="margin:0 0 10px;max-width:none">The shortest path between two rules then says how far apart they sit, and rules in completely different spaces turn out to be neighbours.</p>
+    </div>
+  </div>
+  <div class="slug"><span class="n">05</span><span>Similar behaviour &middot; across spaces</span><span class="sp"></span></div>
+</section>
+
+<!-- 06 -->
+<section class="slide" data-name="Transition graph">
+  <p class="eyebrow">The construction everything else uses</p>
+  <div class="row" style="gap:46px;align-items:flex-start">
+    <div style="flex:1.28 1 0">
+      <div class="fig" style="padding:10px"><img src="img/graph30.png" alt="Functional graph of rule 30 on five cells" style="width:100%"></div>
+      <p class="cap">Rule 30 on a cyclic space of 5 cells. 32 configurations, 32 edges.</p>
+    </div>
+    <div style="flex:1 1 0">
+      <p>Evolve the rule from every configuration of a finite cyclic space. Each configuration gets a single outgoing edge, so the whole dynamics collapses into one functional graph.</p>
+      <p>Red marks the periodic core, the part the system never leaves: here one fixed point and one cycle of length five. Everything else is transient and drains into it.</p>
+      <p class="lead">This one object is what the remaining four methods compare. They differ only in what they read off it.</p>
+      <hr class="hair" style="margin:18px 0 14px">
+      <p class="aside" style="margin:0">The graph is exact but it grows as <span class="m">k<sup>n</sup></span>. 5 cells give 32 nodes, 20 cells give a million, and Life on a 6&times;6 board gives 2<sup>36</sup>.</p>
+    </div>
+  </div>
+  <div class="slug"><span class="n">06</span><span>Transition graph</span><span class="sp"></span></div>
+</section>
+
+<!-- 07 -->
+<section class="slide" data-name="Isomorphic">
+  <p class="eyebrow">Method 02 &middot; isomorphism</p>
+  <div class="row" style="gap:46px;align-items:flex-start">
+    <div style="flex:1.35 1 0">
+      <div class="fig" style="padding:10px"><img src="img/iso.png" alt="Rule 0, rule 255 and the same graph with the labels removed" style="width:100%"></div>
+      <p class="cap">Cyclic space of 4 cells. Rule <span class="m">0</span> drains into the all-zero configuration, rule <span class="m">255</span> into the all-one. Strip the labels and the same graph is left.</p>
+    </div>
+    <div style="flex:1 1 0">
+      <p>Two rules whose transition graphs are isomorphic behave identically, whatever their labels say. The mapping is the state permutation from method 01, found rather than assumed.</p>
+      <p class="lead">Which is the problem. It recovers what we already had, and it answers the same way.</p>
+      <div class="note" style="margin-top:18px"><p>Life and HighLife have no isomorphism between them, so this method returns <em>different</em> and stops. That is true and useless.</p></div>
+    </div>
+  </div>
+  <div class="slug"><span class="n">07</span><span>Isomorphic</span><span class="sp"></span></div>
+</section>
+
+<!-- 08 -->
+<section class="slide" data-name="Canonical form">
+  <p class="eyebrow">Method 03 &middot; canonical form</p>
+  <div class="row" style="gap:46px;align-items:flex-start">
+    <div style="flex:1.3 1 0">
+      <div class="fig" style="padding:13px"><img src="img/canon.png" alt="Distinct canonical structures against space size" style="width:100%"></div>
+      <p class="cap">Distinct canonical forms among the 256 elementary rules, by space size.</p>
+    </div>
+    <div style="flex:1 1 0">
+      <p>Testing isomorphism pair by pair is expensive. Instead, prune every leaf into a code that remembers its parent, repeat until only cycles are left, then encode the cycles. Equal codes mean isomorphic graphs.</p>
+      <p>Now the 256 rules can be sorted in one pass. The count of distinct structures climbs fast, then stops: <span class="m">40</span> at three cells, <span class="m">82</span> at four, and never past <span class="m">85</span>.</p>
+      <p class="lead">Four cells already separates almost every one of the 88 known classes. More space buys almost no new information.</p>
+      <div class="note" style="margin-top:18px"><p>Good for counting behaviours, useless as an index. The comparison is still exact, so the life-like rules come back as simply different from Life.</p></div>
+    </div>
+  </div>
+  <div class="slug"><span class="n">08</span><span>Canonical form</span><span class="sp"></span></div>
+</section>
+
+<!-- 09 -->
+<section class="slide" data-name="Eigenvalues">
+  <p class="eyebrow">Method 04 &middot; spectrum</p>
+  <div class="row" style="gap:46px;align-items:flex-start">
+    <div style="flex:1.1 1 0">
+      <div class="fig" style="padding:11px"><img src="img/spaces.png" alt="Two transition graphs with different node counts" style="width:100%"></div>
+      <div style="display:flex;gap:10px;margin-top:9px">
+        <div style="flex:1 1 0"><div class="m" style="font-size:12.5px;font-weight:500">2 states, 4 cells</div><div class="cap" style="margin-top:2px">16 nodes &rarr; 32 features</div></div>
+        <div style="flex:1 1 0"><div class="m" style="font-size:12.5px;font-weight:500">3 states, 3 cells</div><div class="cap" style="margin-top:2px">27 nodes &rarr; 54 features</div></div>
+      </div>
+    </div>
+    <div style="flex:1 1 0">
+      <p>Take the adjacency matrix of the transition graph, read off its eigenvalues, treat them as a feature vector. Cosine distance between two vectors is finally a number on a scale.</p>
+      <p>The matrix is not symmetric, so the eigenvalues are complex. Splitting real and imaginary parts keeps the information and doubles the length.</p>
+      <p class="lead">And that length is the problem. It is the node count, so the space fixes it, not us.</p>
+      <div class="note" style="margin-top:18px"><p>Comparing a two-state rule with a three-state rule means lining up 32 numbers against 54. There is no honest way to do it.</p></div>
+    </div>
+  </div>
+  <div class="slug"><span class="n">09</span><span>Eigenvalues</span><span class="sp"></span></div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-name="Spectral moments">
+  <p class="eyebrow">Method 05 &middot; spectral moments</p>
+  <div class="row" style="gap:46px;align-items:flex-start">
+    <div style="flex:1.02 1 0">
+      <div class="def" style="margin-bottom:18px">
+        <div class="m" style="font-size:10.5px;letter-spacing:.17em;color:var(--signal);text-transform:uppercase;margin-bottom:11px">Definition</div>
+        <div class="m" style="font-size:23px;line-height:1.35">m<sub style="font-size:14px">j</sub> = |{ x : F<sup style="font-size:14px">j</sup>(x) = x }| / |X|</div>
+        <p style="margin:11px 0 0;font-size:14.5px;max-width:none">Evolve j steps from every configuration and count how many came home. The vector runs m<sub>1</sub> to m<sub>kmax</sub>, and kmax is our choice.</p>
+      </div>
+      <p>The length no longer depends on the graph. Two rules with different state counts, different neighbourhoods, even different dimensions, now give vectors of the same length.</p>
+      <p class="lead">The cosine distance between those vectors is the similarity index.</p>
+    </div>
+    <div style="flex:1 1 0">
+      <div class="fig" style="padding:10px"><img src="img/graph30.png" alt="Rule 30 graph with its periodic core marked" style="width:100%"></div>
+      <div style="margin-top:14px;display:flex;align-items:flex-end;gap:5px;height:84px">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><div style="width:100%;height:11px;background:var(--rule)"></div><div class="m" style="font-size:11px;color:var(--ink2)">1</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><div style="width:100%;height:11px;background:var(--rule)"></div><div class="m" style="font-size:11px;color:var(--ink2)">2</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><div style="width:100%;height:11px;background:var(--rule)"></div><div class="m" style="font-size:11px;color:var(--ink2)">3</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><div style="width:100%;height:11px;background:var(--rule)"></div><div class="m" style="font-size:11px;color:var(--ink2)">4</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><div style="width:100%;height:64px;background:var(--signal)"></div><div class="m" style="font-size:11px;color:var(--signal);font-weight:500">5</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><div style="width:100%;height:11px;background:var(--rule)"></div><div class="m" style="font-size:11px;color:var(--ink2)">6</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><div style="width:100%;height:11px;background:var(--rule)"></div><div class="m" style="font-size:11px;color:var(--ink2)">7</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><div style="width:100%;height:11px;background:var(--rule)"></div><div class="m" style="font-size:11px;color:var(--ink2)">8</div></div>
+      </div>
+      <p class="cap" style="margin-top:9px">Rule 30 on 5 cells. The lone fixed point gives m<sub>1</sub> = 1/32; the five-cycle lifts m<sub>5</sub> to 6/32 = 0.188.</p>
+    </div>
+  </div>
+  <div class="slug"><span class="n">10</span><span>Spectral moments</span><span class="sp"></span></div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-name="Rotations">
+  <p class="eyebrow">Refinement &middot; rotations</p>
+  <div class="row" style="gap:44px;align-items:flex-start">
+    <div style="flex:1.15 1 0">
+      <div class="fig" style="padding:14px"><img src="img/rotclass.png" alt="Four cyclic rotations collapsing into one node" style="width:400px"></div>
+      <p class="cap">On 4 cells, 0001, 0010, 0100 and 1000 become a single node.</p>
+      <div class="fig" style="padding:11px;margin-top:16px"><img src="img/rotcount.png" alt="Node count against space size, raw versus rotation classes" style="width:100%"></div>
+    </div>
+    <div style="flex:1 1 0">
+      <p>A cyclic space has no origin, so two configurations that differ only by a shift are the same picture. Identify them and the graph shrinks.</p>
+      <p>The node count stops depending on the rule and becomes the number of binary necklaces: <span class="m">6</span> at four cells, <span class="m">36</span> at eight, <span class="m">4116</span> at sixteen instead of <span class="m">65 536</span>.</p>
+      <hr class="hair" style="margin:18px 0 15px">
+      <p class="lead" style="margin:0 0 10px">It also removes an artefact: on raw configurations, rules 15, 85, 170 and 240 merge only at <em>even</em> space sizes.</p>
+      <div class="fig" style="padding:9px"><img src="img/shiftparity.png" alt="Rules 15, 85, 170 and 240 on four and on five cells" style="width:100%"></div>
+      <p class="cap">One live cell, raw configurations. 15 and 85 are the complemented shifts, 170 and 240 the plain ones.</p>
+      <p class="aside" style="margin:11px 0 0">Quotient by rotation and the parity vanishes: at every size only 15~85 and 170~240 merge.</p>
+    </div>
+  </div>
+  <div class="slug"><span class="n">11</span><span>Rotations</span><span class="sp"></span></div>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-name="Elementary rules, methods compared">
+  <p class="eyebrow">Results 01 &middot; the 256 elementary rules</p>
+  <div class="row" style="gap:46px;align-items:flex-start">
+    <div style="flex:1.3 1 0">
+      <div class="fig" style="padding:13px"><img src="img/methods.png" alt="Distinct classes among the 256 elementary rules, by method" style="width:100%"></div>
+      <p class="cap">Distinct classes found among the 256 rules. Canonical form and eigenvalues on one rotation-quotiented space of 10 cells. Spectral moments on two of them, 9 and 14 cells, stacked.</p>
+    </div>
+    <div style="flex:1 1 0">
+      <p>One testbed, three methods, the same rotation quotient throughout.</p>
+      <div class="tbl" style="margin:16px 0">
+        <div><span>Canonical form</span><span class="m" style="font-size:15px">85 classes &middot; boolean</span></div>
+        <div><span>Eigenvalues</span><span class="m" style="font-size:15px">60 classes &middot; 216 numbers</span></div>
+        <div><span style="font-weight:500;color:var(--signal)">Spectral moments</span><span class="m" style="font-size:15px;color:var(--signal)">68 classes &middot; 20 numbers</span></div>
+      </div>
+      <p class="lead">The moments separate more rules than the full spectrum, from a vector ten times shorter.</p>
+      <p>Canonical form separates more: it keeps the whole tree, not just the cycles. It still cannot rank what it separates.</p>
+      <p class="aside">One space alone tops out at <span class="m">63</span>, on 14 cells; more cells or a longer vector do not move it. Adding a second space of 9 cells is what reaches <span class="m">68</span>.</p>
+    </div>
+  </div>
+  <div class="slug"><span class="n">12</span><span>Elementary rules &middot; methods compared</span><span class="sp"></span></div>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-name="Elementary rules, the spectrum">
+  <p class="eyebrow">Results 01 &middot; the 256 elementary rules</p>
+  <div class="row" style="gap:26px;align-items:flex-start">
+    <div style="flex:1.5 1 0">
+      <div class="fig" style="padding:10px"><img src="img/ecaclusters.png" alt="The 256 elementary rules projected to two dimensions" style="width:100%"></div>
+      <p class="cap">Unit-normalised moment vectors projected to two dimensions. Dot area is how many rules share that vector.</p>
+    </div>
+    <div style="flex:0.92 1 0">
+      <div class="fig" style="padding:8px"><img src="img/ecamatrix.png" alt="Cosine distance matrix over all 256 rules" style="width:100%"></div>
+      <p class="cap">All 256 &times; 256 cosine distances.</p>
+    </div>
+    <div style="flex:1.05 1 0">
+      <p style="font-size:15px;max-width:none">Rotation-quotiented graph, 14 cells, kmax = 10. The 256 rules collapse to <span class="m">63</span> distinct vectors.</p>
+      <div class="tbl" style="margin:14px 0">
+        <div><span style="font-size:13.5px"><span class="m" style="color:var(--signal);font-weight:500">3 groups</span> by cosine, silhouette 0.668. One of 38 holds 30, 45, 54, 90, 110, 124, 137, 165, 193 among others.</span></div>
+        <div><span style="font-size:13.5px"><span class="m" style="font-weight:500">14 groups</span> by Euclidean distance, mean silhouette 0.254.</span></div>
+        <div><span style="font-size:13.5px"><span class="m" style="font-weight:500">71 rules</span> have a neighbour from another group closer than 0.01.</span></div>
+      </div>
+      <p class="lead" style="font-size:14.5px;max-width:none">The chaotic and complex rules really do land together. But the boundaries are soft, and soft boundaries are what a spectrum looks like.</p>
+    </div>
+  </div>
+  <div class="slug"><span class="n">13</span><span>Elementary rules &middot; the spectrum</span><span class="sp"></span></div>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-name="Life, exact 4x4">
+  <p class="eyebrow">Results 02 &middot; Conway's Life, exact</p>
+  <div class="row" style="gap:46px;align-items:flex-start">
+    <div style="flex:1.3 1 0">
+      <div class="fig" style="padding:13px"><img src="img/gol4x4.png" alt="Spectral moment vectors for Life and two variants" style="width:100%"></div>
+      <div class="legend">
+        <span><i class="swatch" style="background:#B4231B"></i>Life &mdash; B3/S23</span>
+        <span><i class="swatch" style="background:#10161C"></i>Life+S8 &mdash; B3/S238</span>
+        <span><i class="swatch" style="background:#3F7A46"></i>Life+B8 &mdash; B38/S23</span>
+      </div>
+      <p class="cap">Exact 4&times;4 torus, 16 cells, 4156 translation classes, kmax = 8.</p>
+    </div>
+    <div style="flex:1 1 0">
+      <p>A board this small is fully enumerable, so these moments are exact rather than estimated. Two Moore variants of Life: one that also survives on eight neighbours, one that is also born on eight.</p>
+      <div class="tbl" style="margin:18px 0">
+        <div><span>Life vs Life+B8</span><span class="m" style="font-size:17px;font-weight:500">0.000000</span></div>
+        <div><span>Life vs Life+S8</span><span class="m" style="font-size:17px;font-weight:500;color:var(--signal)">0.000516</span></div>
+      </div>
+      <p>The birth variant returns a vector identical to Life's, digit for digit. Being born on eight live neighbours never happens in a way that reshapes the cycle structure.</p>
+      <p class="aside">One board, one size. Suggestive, not established. It needs larger grids and many more B/S variants.</p>
+    </div>
+  </div>
+  <div class="slug"><span class="n">14</span><span>Life &middot; exact 4&times;4</span><span class="sp"></span></div>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-name="Life, sampling at 6x6">
+  <p class="eyebrow">Results 02 &middot; sampling at 6&times;6</p>
+  <div class="row" style="gap:46px;align-items:flex-start">
+    <div style="flex:1 1 0">
+      <div class="fig" style="padding:11px"><img src="img/gol6x6.png" alt="Cosine distance matrix for five rules at 6x6" style="width:100%"></div>
+    </div>
+    <div style="flex:1.18 1 0">
+      <p>36 cells means 2<sup>36</sup> configurations and no exact graph. Instead: 3000 random starts per rule, a 200-step transient to settle onto an attractor, then up to 150 steps to detect its period.</p>
+      <p class="lead">Von Neumann B2/S12 lands <em>inside</em> the Moore group, between 0.0027 and 0.0065. Only B13/S2 separates, at 0.056 to 0.095.</p>
+      <p>So the measure is not reading off the neighbourhood template. It responds to the dynamics a rule actually produces.</p>
+      <div style="display:flex;gap:14px;margin-top:16px">
+        <div style="flex:1 1 0;border-top:2px solid var(--ink);padding-top:10px">
+          <div class="stat">23.7%</div>
+          <p style="margin:4px 0 0;font-size:13.5px;line-height:1.4;max-width:none">of B13/S2 samples never resolved a period inside 150 steps</p>
+        </div>
+        <div style="flex:1 1 0;border-top:2px solid var(--ink);padding-top:10px">
+          <div class="stat">&lt;0.00023</div>
+          <p style="margin:4px 0 0;font-size:13.5px;line-height:1.4;max-width:none">between raw and rotation-quotiented vectors, for 4 of the 5 rules</p>
+        </div>
+      </div>
+      <p class="aside" style="margin-top:14px">The sampled estimate is weighted by basin size, so it compares rules against each other, not against the exact 4&times;4 numbers.</p>
+    </div>
+  </div>
+  <div class="slug"><span class="n">15</span><span>Life &middot; sampling at 6&times;6</span><span class="sp"></span></div>
+</section>
+
+<!-- 16 -->
+<section class="slide" data-name="Totalistic mutations">
+  <p class="eyebrow">Results 03 &middot; totalistic rules, k = 3</p>
+  <div class="row" style="gap:46px;align-items:flex-start">
+    <div style="flex:1.3 1 0">
+      <div class="fig" style="padding:13px"><img src="img/tca.png" alt="Mutation distance against spectral cosine distance" style="width:100%"></div>
+      <p class="cap">All pairs among the 45 rules. The red line is the mean cosine distance at each mutation distance.</p>
+    </div>
+    <div style="flex:1 1 0">
+      <p>A test on someone else's question. In the totalistic space k = 3, r = 1, a rule has a <em>finite lifeform</em> when a single active cell grows and then dies out completely.</p>
+      <p>Of 729 candidate rules, <span class="m">45</span> do, and all 45 form one connected component under single-digit mutations of the rule code. The connectivity claim holds.</p>
+      <div style="border-top:2px solid var(--ink);padding-top:11px;margin:18px 0">
+        <div class="stat" style="font-size:27px">0.006</div>
+        <p style="margin:5px 0 0;font-size:14px;line-height:1.45;max-width:none">Spearman correlation between mutation distance and spectral cosine distance. Pairs with identical evolution still reach 0.276.</p>
+      </div>
+      <p class="lead">A lifeform is one initial condition. The moments are all of them. The two measure different things, and the flat red line says so.</p>
+    </div>
+  </div>
+  <div class="slug"><span class="n">16</span><span>Totalistic mutations</span><span class="sp"></span></div>
+</section>
+
+<!-- 17 -->
+<section class="slide ink" data-name="What is open">
+  <p class="eyebrow">What is still open</p>
+  <div style="display:flex;gap:22px;margin-top:26px">
+    <div style="flex:1 1 0;border-top:2px solid var(--signal);padding-top:14px">
+      <h2>The context window</h2>
+      <p style="font-size:14px;margin:0;line-height:1.5;max-width:none">Four cells already separates almost every elementary rule. Find the smallest space that keeps the distinctions in general, and stop paying for the rest.</p>
+    </div>
+    <div style="flex:1 1 0;border-top:2px solid var(--signal);padding-top:14px">
+      <h2>Bigger and higher</h2>
+      <p style="font-size:14px;margin:0;line-height:1.5;max-width:none">Grids past 4&times;4 and three-dimensional automata. The survival-over-birth result rests on one small board and needs many more B/S variants before it means anything.</p>
+    </div>
+    <div style="flex:1 1 0;border-top:2px solid var(--signal);padding-top:14px">
+      <h2>The samples that never returned</h2>
+      <p style="font-size:14px;margin:0;line-height:1.5;max-width:none">Nearly a quarter of B13/S2 runs found no period in 150 steps. Long-period or genuinely chaotic, and the estimator has to be able to say which.</p>
+    </div>
+    <div style="flex:1 1 0;border-top:2px solid var(--signal);padding-top:14px">
+      <h2>Cost</h2>
+      <p style="font-size:14px;margin:0;line-height:1.5;max-width:none">The transition graph grows exponentially in cells and states. Better sampling, spectral approximation and further graph reductions are what make this usable at scale.</p>
+    </div>
+  </div>
+  <div style="position:absolute;left:72px;right:72px;bottom:84px;border-top:1px solid var(--hair);
+    padding-top:18px;display:flex;justify-content:space-between;align-items:baseline">
+    <div style="font-family:var(--disp);font-variation-settings:'wdth' 116,'wght' 780;font-size:28px;letter-spacing:-.02em">Thank you</div>
+    <div class="m" style="font-size:12px;color:var(--ink2)">Erick Jesse Angeles Lopez &nbsp;&middot;&nbsp; Mentor: Sukanta Das &nbsp;&middot;&nbsp; ISSCA 2026</div>
+  </div>
+  <div class="slug"><span class="n">17</span><span>What is open</span><span class="sp"></span></div>
+</section>
+
+    </div>
+  </div>
+  <div class="bar"><span><b id="cn">01</b> / <span id="tn">17</span></span></div>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var deck = document.getElementById('deck');
+  var stage = document.getElementById('stage');
+  var cn = document.getElementById('cn');
+  var cur = 0;
+
+  document.getElementById('tn').textContent = String(slides.length).padStart(2,'0');
+
+  function fit(){
+    var pad = 32;
+    var k = Math.min((stage.clientWidth - pad) / 1280, (stage.clientHeight - pad) / 720);
+    deck.style.transform = 'scale(' + Math.max(k, 0.1) + ')';
+  }
+
+  function go(i){
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach(function(s, j){ s.classList.toggle('on', j === cur); });
+    cn.textContent = String(cur + 1).padStart(2,'0');
+  }
+
+  document.addEventListener('keydown', function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown') { go(cur+1); e.preventDefault(); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { go(cur-1); e.preventDefault(); }
+    else if (k === 'Home') { go(0); e.preventDefault(); }
+    else if (k === 'End') { go(slides.length-1); e.preventDefault(); }
+  });
+
+  window.addEventListener('resize', fit);
+  fit();
+  go(0);
+})();
+</script>
