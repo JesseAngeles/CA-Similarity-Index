@@ -28,5 +28,76 @@ Dos reglas tienen la misma forma canónica si y solo si sus grafos de transició
 
 Al agrupar las reglas por forma canónica se obtienen las clases de comportamiento en un espacio de $n$ células. El número de clases crece con $n$, pero no indefinidamente: en ECA, con espacios de 4 células ya se distinguen casi todos los comportamientos conocidos. Esto plantea la pregunta de cuál es el tamaño mínimo del espacio que conserva la información necesaria para distinguir las reglas.
 
-% TODO: tabla o gráfica del número de clases por forma canónica conforme aumenta n (ECA),
-% comparado con las 88 clases (permutación y espejo) y las 81 (con reducciones)
+\subsection{Forma canónica en GPU}
+
+Calcular la forma canónica para las reglas ECA solo era viable hasta espacios de alrededor de 10 células. Para explorar espacios más grandes implementamos el mismo proceso en la GPU (CUDA desde Mathematica): los sucesores, el grado de entrada y la poda desde los Jardín del Edén se calculan en paralelo con un hilo por configuración, y el código de cada árbol se representa con un hash de 64 bits del multiconjunto de los códigos de sus hijos, acumulado con sumas atómicas. Los ciclos se compactan en la GPU y su rotación mínima se obtiene en CPU. Para $n = 1, \dots, 10$ y las 256 reglas, la partición obtenida es idéntica a la de la forma canónica exacta. El límite es la memoria de la tarjeta (16~GB): unos 20 bytes por configuración permiten llegar a $n = 29$ ($2^{29}$ configuraciones). Como las reglas relacionadas por permutación de estados o espejo tienen grafos isomorfos, basta evolucionar un representante de cada una de las 88 clases.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\textwidth]{canonical_classes_gpu.png}
+\caption{Número de formas canónicas distintas entre las 88 reglas representantes para $n = 1, \dots, 29$ (eje vertical en escala cúbica). Las líneas punteadas marcan las 88 clases por permutación de estados y espejo y las 81 clases con las cuatro relaciones de herencia.}
+\label{fig:canonical-classes}
+\end{figure}
+
+\begin{table}
+\centering
+\caption{Número de formas canónicas distintas entre las 88 reglas representantes en un espacio periódico de $n$ células.}
+\label{tab:canonical-classes}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{l*{15}{c}}
+\hline
+$n$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 \\
+Clases & 3 & 9 & 40 & 82 & 82 & 85 & 82 & 84 & 85 & 85 & 85 & 84 & 85 & 85 & 85 \\
+\hline
+$n$ & 16 & 17 & 18 & 19 & 20 & 21 & 22 & 23 & 24 & 25 & 26 & 27 & 28 & 29 & \\
+Clases & 84 & 85 & 85 & 85 & 84 & 85 & 85 & 84 & 84 & 85 & 85 & 85 & 84 & 85 & \\
+\hline
+\end{tabular}
+\end{table}
+
+El número de clases se estabiliza en 84 o 85 a partir de $n = 8$ (Figura~\ref{fig:canonical-classes} y Tabla~\ref{tab:canonical-classes}), pero ningún tamaño alcanza las 88: en cada $n$ hay pares de reglas sin relación de permutación de estados ni espejo cuyos grafos de transición son isomorfos. Con $n \le 3$ se agrupan muchas reglas (grupos de 40, 24 y 24 reglas con $n = 1$). La Tabla~\ref{tab:canonical-merges} muestra las reglas agrupadas a partir de $n = 4$.
+
+\begin{table}
+\centering
+\caption{Reglas representantes con la misma forma canónica en un espacio de $n$ células.}
+\label{tab:canonical-merges}
+\begin{tabular}{p{3.6cm}cp{6.4cm}}
+\hline
+$n$ & Clases & Reglas agrupadas \\
+\hline
+4 & 82 & \{15,170\}, \{23,178\}, \{77,232\}, \{105,150\}, \{25,45\}, \{28,78\} \\
+5 & 82 & \{10,34\}, \{24,46\}, \{136,160\}, \{28,122\}, \{36,72\}, \{44,78\} \\
+6 & 85 & \{15,170\}, \{23,178\}, \{77,232\} \\
+7 & 82 & \{10,34\}, \{24,46\}, \{136,160\}, \{15,105\}, \{60,90\}, \{150,170\} \\
+8, 12, 16, 20, 24, 28 & 84 & \{15,170\}, \{23,178\}, \{77,232\}, \{105,150\} \\
+10, 14, 18, 22, 26 & 85 & \{15,170\}, \{23,178\}, \{77,232\} \\
+9, 11, 13, 15, 17, 19, 21, 25, 27, 29 & 85 & \{10,34\}, \{24,46\}, \{136,160\} \\
+23 & 84 & \{10,34\}, \{24,46\}, \{136,160\}, \{60,90\} \\
+\hline
+\end{tabular}
+\end{table}
+
+A partir de $n = 8$ los pares agrupados dependen de la paridad del espacio: con $n$ par siempre se agrupan \{15,170\}, \{23,178\} y \{77,232\}, y si $n$ es múltiplo de 4 también \{105,150\}; con $n$ impar siempre se agrupan \{10,34\}, \{24,46\} y \{136,160\}. La única excepción es \{60,90\}, que se agrupan en $n = 7$ y $n = 23$.
+
+Como los pares agrupados en espacios pares no se agrupan en espacios impares y viceversa, combinar dos tamaños recupera los 88 comportamientos: dos reglas se consideran iguales solo si tienen la misma forma canónica en ambos espacios. La Tabla~\ref{tab:canonical-joint} muestra el número de clases al combinar dos tamaños. Ningún tamaño por sí solo, ni ninguna combinación de dos tamaños pares o de dos impares con $n \le 29$, alcanza las 88 clases; siempre se necesita un espacio par y uno impar. Sin embargo, no toda combinación par--impar funciona ($\{1,4\}$ da 86, $\{2,3\}$ da 75 y $\{1,9\}$ da 85). La combinación mínima es $n = 3$ y $n = 4$: con únicamente estos dos espacios, es decir, con solo $2^3 + 2^4 = 24$ configuraciones, se distinguen los 88 comportamientos de las reglas ECA. Le siguen $\{2,5\}$, $\{4,5\}$, $\{1,6\}$, $\{3,6\}$ y $\{5,6\}$, y a partir de $n = 5$ cualquier combinación de un tamaño par y uno impar da 88 clases.
+
+\begin{table}
+\centering
+\caption{Número de clases al combinar la forma canónica en dos tamaños de espacio $n_1$ y $n_2$ (la diagonal corresponde a un solo tamaño). Las combinaciones que distinguen los 88 comportamientos están en negritas.}
+\label{tab:canonical-joint}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{c|cccccccccc}
+$n_1 \backslash n_2$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+\hline
+1 & 3 & 10 & 40 & 86 & 82 & \textbf{88} & 82 & \textbf{88} & 85 & \textbf{88} \\
+2 & 10 & 9 & 75 & 83 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 \\
+3 & 40 & 75 & 40 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} \\
+4 & 86 & 83 & \textbf{88} & 82 & \textbf{88} & 85 & \textbf{88} & 84 & \textbf{88} & 85 \\
+5 & 82 & \textbf{88} & 85 & \textbf{88} & 82 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} \\
+6 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 \\
+7 & 82 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 82 & \textbf{88} & 85 & \textbf{88} \\
+8 & \textbf{88} & 85 & \textbf{88} & 84 & \textbf{88} & 85 & \textbf{88} & 84 & \textbf{88} & 85 \\
+9 & 85 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} \\
+10 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 \\
+\end{tabular}
+\end{table}
