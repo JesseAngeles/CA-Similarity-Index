@@ -1,0 +1,32 @@
+\section{Structural comparison of transition graphs}
+\label{sec:structural}
+
+Las relaciones de la Sección~\ref{sec:inheritance} se definen sobre la regla local. Una alternativa es comparar directamente la dinámica global: para un espacio de $n$ células existen $N = |\mathcal{S}|^n$ configuraciones, y al evolucionar todas ellas un paso se obtiene el grafo de transición $G_F$ de la regla. Decimos que dos reglas tienen el mismo comportamiento en un espacio de $n$ células si sus grafos de transición tienen la misma topología, es decir, si son isomorfos.
+
+Estos métodos tienen dos restricciones principales:
+\begin{enumerate}
+    \item La comparación sigue siendo binaria.
+    \item El resultado depende del tamaño del espacio $n$: dos reglas pueden tener grafos isomorfos para un valor de $n$ y no para otro, y el número de comportamientos distinguibles cambia con $n$.
+    \item La comparación unicamente es entre reglas del mismo dominio. 
+\end{enumerate}
+
+\subsection{Isomorfismo y forma canónica}
+
+La comparación isomorfica identifica con total exactitud las reglas por permutación y las reglas espejos, corroborando que la topologia de esas reglas es identifica. 
+
+Este proceso resulta computacionalmente costoso. Una alternativa es la representación del grafo evolutivo en us forma canonica: una codificación que no depende de las etiquetas de los nodos, de modo que dos grafos son isomorfos si y solo si sus formas canónicas son iguales. Así, cada grafo se codifica una sola vez y comparar reglas se reduce a comparar códigos. Aprovechando que $G_F$ es un grafo funcional (cada componente es un ciclo con árboles colgando), la forma canónica se construye de la siguiente manera:
+
+\begin{enumerate}
+    \item Se agregan a una cola todos los nodos sin predecesor (Jardín del Edén).
+    \item Se extrae un nodo de la cola y se le asigna como código la lista ordenada de los códigos de sus predecesores (vacía para los Jardín del Edén). Este código se agrega a la lista de predecesores de su sucesor.
+    \item Si el sucesor ya no tiene predecesores sin procesar, se agrega a la cola. Se repite hasta vaciar la cola.
+    \item Los nodos que nunca entraron a la cola son exactamente los nodos de los ciclos. Cada ciclo se codifica como la secuencia de los códigos de sus nodos (cada uno con el árbol que cuelga de él), tomando la rotación lexicográficamente menor para que no dependa del nodo inicial.
+    \item La forma canónica es la lista ordenada de los códigos de todos los ciclos.
+\end{enumerate}
+
+Dos reglas tienen la misma forma canónica si y solo si sus grafos de transición son isomorfos.
+
+Al agrupar las reglas por forma canónica se obtienen las clases de comportamiento en un espacio de $n$ células. El número de clases crece con $n$, pero no indefinidamente: en ECA, con espacios de 4 células ya se distinguen casi todos los comportamientos conocidos. Esto plantea la pregunta de cuál es el tamaño mínimo del espacio que conserva la información necesaria para distinguir las reglas.
+
+% TODO: tabla o gráfica del número de clases por forma canónica conforme aumenta n (ECA),
+% comparado con las 88 clases (permutación y espejo) y las 81 (con reducciones)

@@ -1,0 +1,73 @@
+\section{Spectral methods}
+\label{sec:spectral}
+
+Los métodos de la Sección~\ref{sec:structural} solo responden si dos reglas son iguales o no. Para obtener una medida gradual, buscamos representar cada regla con un vector numérico derivado de su grafo de transición, de modo que la distancia entre vectores funcione como índice de similitud.
+
+\subsection{Eigenvalores}
+
+En este método se calculan los eigenvalores de la matriz de adyacencia $A$ del grafo de transición, se ordenan y se usan como vector de características de la regla; dos reglas se comparan mediante la distancia coseno entre sus vectores. Si dos grafos son isomorfos, sus matrices de adyacencia son similares por una permutación y producen los mismos eigenvalores, por lo que la distancia es cero. En caso contrario, la distancia mide qué tan distintos son sus espectros. Con este método se obtienen 74 comportamientos distintos en ECA con un espacio de 18 células.
+
+Esto explica las dos limitaciones principales del método.
+
+\paragraph{Ceguera a los transitorios.} Como los árboles transitorios solo aportan eigenvalores nulos, el espectro no distingue cómo se distribuyen las configuraciones en las cuencas ni cuántos pasos tardan en llegar al atractor. Por ejemplo, las reglas 0 y 8 de ECA no están relacionadas por ninguna de las relaciones de la Sección~\ref{sec:inheritance}, ni siquiera después de reducir vecinos, y sus grafos de transición no son isomorfos. Sin embargo, en ambas el único atractor es el punto fijo formado por puros ceros: en la regla 0 todas las configuraciones llegan a él en un paso, mientras que en la regla 8 algunas tardan dos. Ambas tienen el mismo espectro (un eigenvalor $1$ y $N - 1$ eigenvalores $0$), por lo que el método las considera idénticas. Este caso no es excepcional, lo que explica que el número de comportamientos distintos nunca alcance al obtenido con la forma canónica.
+
+\paragraph{Dependencia del dominio.} El número de eigenvalores es igual al número de nodos $N = |\mathcal{S}|^n$, por lo que solo se pueden comparar reglas con el mismo número de estados y el mismo tamaño de espacio.
+
+\subsection{Momentos espectrales}
+
+Para resolver la dependencia del dominio proponemos usar los momentos espectrales. En lugar de calcular el espectro completo, para cada paso $k = 1, \dots, K$ se mide la proporción de configuraciones que regresan a sí mismas tras $k$ pasos:
+\[
+  m_k = \frac{|\{x \in \mathcal{C} : F^k(x) = x\}|}{N}
+\]
+
+La ventaja es que la longitud del vector es $K$ y no depende del tamaño del grafo, así que ahora es posible comparar reglas con distinto número de estados, vecindades o tamaños de espacio. Las reglas relacionadas por reducción de estados o de vecindad (Sección~\ref{sec:inheritance}) sirven como referencia para validar estas comparaciones entre dominios. La desventaja es que $K$ debe elegirse de modo que los ciclos relevantes de ambos grafos queden dentro de la ventana. Los vectores se comparan mediante la distancia coseno, que es nuestro índice de similitud.
+
+En ECA, con el grafo cociente por rotaciones de 14 células y $K = 10$, se obtienen 63 vectores distintos para las 256 reglas.
+
+Sin embargo, como $m_k$ solo depende de los eigenvalores, este método hereda la ceguera a los transitorios: las reglas 0 y 8 tienen $m_k = 1/N$ para todo $k$.
+
+\subsection{Momentos espectrales con masa de atractor}
+\label{subsec:attractor_mass}
+
+Para distinguir reglas como la 0 y la 8 es necesario medir, además de los atractores, la fuerza con la que atraen a las demás configuraciones: cuántas configuraciones llegan a cada atractor y en cuántos pasos. La idea es que cada ciclo se siga activando cada $p$ pasos, como en los momentos espectrales, pero que en cada activación se sumen también las configuraciones que ya llegaron a él.
+
+Usando la altura $h(x)$ y el periodo $p(x)$ de cada configuración, definimos
+\[
+  \tilde{m}_k = \frac{|\{x \in \mathcal{C} : p(x) \mid k \ \text{ y } \ h(x) \le k - p(x)\}|}{N}, \quad k = 1, \dots, K.
+\]
+Es decir, una configuración cuenta en el paso $k$ si su atractor se activa en ese paso y ella ya había llegado a él antes de la activación anterior. Así, los nodos del ciclo ($h = 0$) cuentan desde la primera activación ($k = p$), los nodos con $1 \le h \le p$ desde la segunda ($k = 2p$), los nodos con $p < h \le 2p$ desde la tercera, y así sucesivamente.
+
+Como toda configuración periódica cumple la condición cuando $p \mid k$, el vector se descompone como
+\[
+  \tilde{m}_k = m_k + t_k,
+\]
+donde $m_k$ es el momento espectral y $t_k$ es la proporción de configuraciones transitorias que cuentan en el paso $k$. Por lo tanto, el nuevo vector extiende a los momentos espectrales con la información de las cuencas, y conserva la ventaja de tener longitud $K$ independiente del dominio.
+
+Por ejemplo, con 5 células ($N = 32$), la regla 0 envía todas las configuraciones a cero en un paso ($h \le 1$), mientras que en la regla 8 cada bloque de unos deja un 1 aislado que desaparece en el siguiente paso ($h \le 2$); de las 32 configuraciones, 12 llegan a cero en a lo más un paso. Sus vectores son
+\[
+  \tilde{m}^{(0)} = \tfrac{1}{32}\,(1, 32, 32, 32, \dots), \qquad
+  \tilde{m}^{(8)} = \tfrac{1}{32}\,(1, 12, 32, 32, \dots),
+\]
+que ya no son iguales, aunque sus momentos espectrales sí lo son.
+
+Un ejemplo con ciclos más largos es la regla 30 con 5 células (Fig.~\ref{fig:r30}). Su grafo tiene dos componentes: el punto fijo $0$, cuya cuenca es $\{0, 31\}$, y un ciclo de longitud 5 del que cuelgan cinco cadenas de cinco configuraciones cada una, con una cuenca de 30 configuraciones. En $k = 1$ solo cuenta el punto fijo, y desde $k = 2$ también la configuración 31. En $k = 5$ se activa por primera vez el ciclo y cuentan solo sus 5 nodos; en $k = 10$ cuentan además las 25 configuraciones transitorias, que llegaron al ciclo en a lo más 5 pasos:
+\[
+  \tilde{m}^{(30)} = \tfrac{1}{32}\,(1, 2, 2, 2, 7, 2, 2, 2, 2, 32, 2, 2, 2, 2, 32, \dots).
+\]
+Si alguna configuración tardara 7 pasos en llegar al ciclo de longitud 5, contaría hasta $k = 15$, la tercera activación.
+
+% TODO: figura del grafo de transición de la regla 30 con 5 células (r30_5celdas_grafo.png en la raíz del repo).
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{r30_5celdas_grafo}
+%     \caption{Grafo de transición de la regla 30 con 5 células.}
+%     \label{fig:r30}
+% \end{figure}
+
+Este método tiene algunas limitaciones. La resolución con la que se mide la altura depende del periodo, pues las configuraciones se agrupan en intervalos de $p$ pasos: con periodos largos, una configuración con $h = 1$ y otra con $h = p$ cuentan en el mismo paso. Además, un ciclo con $p > K$ nunca se activa. Finalmente, en la reducción de estados las configuraciones que contienen el estado eliminado son Jardín del Edén adicionales que llegan un paso más tarde y cambian la normalización $N$, por lo que es necesario verificar cómo se comportan los pares relacionados por esta reducción.
+
+% TODO: experimento pendiente (requiere Mathematica):
+% 256 ECA, n = 14, cociente por rotaciones:
+% 1. número de vectores distintos (contra 63 con momentos espectrales);
+% 2. verificar que 0 y 8 se separen y que los pares de las 81 clases queden en 0;
+% 3. silhouette del clustering contra 0.254.

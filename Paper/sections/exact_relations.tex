@@ -1,0 +1,63 @@
+\section{Exact relations: Inheritance properties}
+\label{sec:inheritance}
+
+Este método surge como una extensión de los criterios de equivalencia ya conocidos. Los cuales son permutación de estados y reglas espejo. La idea central es que existen relaciones adicionales entre reglas diferentes espacios. La regla 0 es el mejor representante, ya que no importa el numero de estados, el tamaño de la vecindad ni la dimensionalidad, todas las reglas 0 tiene el mismo comportamiento. Con esto surge la siguiente pregunta: ¿Cuales son los criterios de similitud entre reglas de diferentes espacios?
+
+Para esto, llamaremos dominio de una regla a la 3-tupla de dimensión, estados y vecindad en la que está definida. Dos reglas pertenecen al mismo dominio si comparten los tres elementos.
+
+\subsection{Reglas del mismo dominio}
+\label{subsection:rules_same_domain}
+
+Para comparar reglas en el mismo dominio existe dos relaciones ampliamente utilizadas. En ECA, son capaces de reducir las 256 reglas a 88 comportamientos~\cite{genaro2013_class} mediante la permutación de estados y las reglas espejo.
+
+Sean $\mathcal{A}_1$ y $\mathcal{A}_2$ dos autómatas celulares del mismo dominio, y sea $(x_1, \dots, x_m) \in \mathcal{S}^m$ el estado de la vecindad. Decimos que $\mathcal{A}_1$ y $\mathcal{A}_2$ son equivalentes si se cumple alguna de las siguientes condiciones:
+
+\begin{itemize}
+    \item \textbf{Permutación de estados}: existe una biyección de estados $\pi : \mathcal{S} \to \mathcal{S}$ tal que
+    \[
+    \mathcal{R}_2(x_1, \dots, x_m) = \pi\left( \mathcal{R}_1\left( \pi^{-1}(x_1), \dots, \pi^{-1}(x_m) \right) \right), \quad \forall (x_1, \dots, x_m) \in \mathcal{S}^m.
+    \]
+    Es decir, si cambiamos todos los estados, la estructura sigue siendo la misma. Para $\mathcal{S} = \{0, 1\}$, la única permutación es $\pi(x) = 1 - x$, que intercambia los dos estados (los ceros por los unos y viceversa). Por ejemplo,  en ECA la regla 0 es equivalente a la regla 255.
+
+    \item \textbf{Reglas espejo}: sea $M : \mathcal{S}^m \to \mathcal{S}^m$ la reflexión de la vecindad,
+    $M(x_1, \dots, x_m) = (x_m, \dots, x_1)$. Decimos que $\mathcal{A}_2$ es la regla espejo de $\mathcal{A}_1$ si
+    \[
+    \mathcal{R}_2(x_1, \dots, x_m) = \mathcal{R}_1\left( M(x_1, \dots, x_m) \right)
+    \]
+
+    Es decir, si reflejamos la configuración inicial, la evolucionamos con $\mathcal{A}_1$ y reflejamos el resultado, obtenemos exactamente la evolución de $\mathcal{A}_2$: el diagrama espacio-tiempo de una regla es el reflejo horizontal del de la otra. Por ejemplo, en ECA la regla 110 es equivalente a la regla 124.
+\end{itemize}
+
+\subsection{Reducción de estados}
+
+Sea la regla $\mathcal{A}$. La reducción de estados es posible cuando existen dos estados $a \neq b \in \mathcal{S}$ que cumplen las siguientes condiciones:
+\begin{enumerate}
+
+    \item El estado $a$ no es producido por la regla: $\mathcal{R}(x_1, \dots, x_m) \neq a, \; \forall (x_1, \dots, x_m) \in \mathcal{S}^m$.
+    \item El estado $a$ se comporta igual que $b$ en cualquier posición de la vecindad: $\mathcal{R}(x_1, \dots,a, \dots, x_m) = \mathcal{R}(x_1, \dots,b,\dots, x_m)$.
+\end{enumerate}
+Entonces el autómata reducido es $\mathcal{A}' = (\mathcal{L}, \mathcal{S}', \mathcal{N}, \mathcal{R}')$ con $\mathcal{S}' = \mathcal{S} \setminus \{a\}$. P
+
+La justificación es la siguiente: como el estado $a$ nunca es producido, solo puede aparecer en la condición inicial, y como su transición coincide con la de $b$, ambas tienen el mismo comportamiento para toda configuración $\sigma$. Por lo tanto, a partir del primer paso la evolución de $\mathcal{A}$ es exactamente la de $\mathcal{A}'$. En el grafo de transición, las configuraciones que contienen al estado $a$ son Jardín del Edén que se agregan a los árboles de $\mathcal{A}'$.
+
+\subsection{Reducción de vecindad}
+
+La reducción de vecindad es posible cuando el estado de un vecino no afecta a la transición, es decir, existe un índice $j$ tal que: 
+\[
+\mathcal{R}(x_1, \dots, x_j, \dots, x_m) = \mathcal{R}(x_1, \dots, x_j', \dots, x_m), \quad \forall (x_1, \dots, x_m) \in \mathcal{S}^m, \; \forall x_j' \in \mathcal{S}.
+\]
+Entonces el autómata reducido es $\mathcal{A}' = (\mathcal{L}, \mathcal{S}, \mathcal{N}', \mathcal{R}')$ con $\mathcal{N}' = \mathcal{N} \setminus \{\vec{v}_j\}$.
+
+Si el vecino eliminado no forma parte de los extremos, entonces se realiza un ajuste en la vecindad que la vuelve conigua de $m - 1$ células. 
+
+\subsection{Reducciones adicionales}
+
+De forma análoga se puede definir la reducción de dimensionalidad, cuando la regla no depende de uno de los ejes del espacio (por ejemplo, una regla en $\mathbb{Z}^2$ que imita a un ECA sin depender del eje vertical). Esta reducción no se considera en este trabajo, pues el objeto de estudio se limita a una dimensión.
+
+Otra reducción posible es la de distancia vecinal: considerar a los vecinos por dirección y no por distancia, de modo que los vectores de desplazamiento se compriman a una vecindad contigua. Por ejemplo, una regla con vecindad $(-1, 1)$ se compara con la misma regla con vecindad $(-1, 0)$. Esta compresión solo está definida si no hay dos vecinos en la misma dirección (por ejemplo, no puede haber un vecino en $-3$ y otro en $-1$). Una hipótesis es que el comportamiento de ambas reglas es el mismo bajo una distorsión del espacio (Fig.~\ref{fig:distance_reduction}).
+
+\subsection{Clases de equivalencia}
+
+Con estas cuatro relaciones (permutación de estados, espejo, reducción de estados y reducción de vecindad) es posible relacionar reglas de dominios distintos. Aplicándolas de forma iterativa se construye un grafo de relaciones, cuyas componentes conexas son las clases de equivalencia. Aunque esta clasificación sigue siendo binaria (dos reglas son o no son equivalentes), funciona como referencia para validar los métodos siguientes: si dos reglas son equivalentes, su índice de similitud debería ser uno.
+
+Mediante reducción de vecindad se pueden obtener una reducción de los comportamientos unicos. En ECA se reduce de 88 a 81 clases de equivalencia. Algunas de estas clases se unen porque sus reglas se reducen a la misma regla de un dominio menor. Por ejemplo, la regla 10 ($\neg l \wedge r$) y la regla 12 ($\neg l \wedge c$) se reducen a la regla 2 de dos vecinos ($\neg a \wedge b$); la primera al eliminar la célula central y la segunda al eliminar el vecino derecho.

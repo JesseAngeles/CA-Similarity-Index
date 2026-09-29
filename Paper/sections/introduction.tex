@@ -1,5 +1,8 @@
 \section{Introduction}
 
-Aunque existen 256 reglas bajo la definición de los automatas celulares elementales propuesta por Stephen Wolfram, existen reglas reglas que tienen el mismo comportamiento, por lo que realmente solo existen 88 comportamientos unicos bajo los criterios de permutación de estados y las reglas espejos. 
+Los automatas celulares son sistemas complejos, funciones que definen comprotamientos muchas veces caoticos pero otras veces facilmente predecibles. Multiples investigaciones han realizado clasificaciones para determinar comportamientos diferentes, como la clasificación de Wolfram, de TODO o el conjunto de reglas life-like. Estas clasificaciones suelen diseñarse según su comportamiento, pero ¿Qué tan parecidas son estas reglas? y ¿Que tan diferentes son de otro conjunto de reglas?
 
-Estos metodos nos permite identificar si dos reglas tienen el mismo comportamiento, el problema, esta comparación sigue siendo binaria, por lo que si no son similares, entonces ¿Que tan diferentes son?. En esta investigación se exploran diferentes tecnicas para medir la similitud y definir un indice de similitud que permita comparar diferentes reglas basados en el comportamiento evolutivo. 
+Actualmente las clasificaciones es la unica medida que podemos utilizar para definir si dos reglas son parecidas, o directamente comparando su comportamiento exacto. Sin emabrgo, no existe una medida que nos permita comparar que tal similiares son. El proposito de esta investigación es definir un metodo que nos permita comparar el comportamiento de cualqesquiera dos reglas y medir su grado de similitud. 
+
+Para conocer las similitudes es necesario cidentificar que relaciones exactas ya existen entre diferentes dominios, encontrar equivalencia y usarlas como metrica de similitud para los algoritmos propuestos, que esencialmente se reducen al calculo de momentos espectrales con un metodo que identifica el incremento de la masa del atractor.
+
