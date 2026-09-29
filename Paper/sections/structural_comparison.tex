@@ -101,3 +101,33 @@ $n_1 \backslash n_2$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
 10 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 & \textbf{88} & 85 \\
 \end{tabular}
 \end{table}
+\subsection{Forma canónica del grafo cociente}
+
+Repetimos la clasificación sobre el grafo cociente por traslaciones (Sección~\ref{subsec:quotient}). En la GPU solo cambia el cálculo de sucesores: un hilo por configuración marca las que son su propia rotación mínima (los representantes de cada clase) y un hilo por representante aplica la regla y busca la rotación mínima del resultado; la poda y los ciclos usan los mismos kernels. El número de nodos baja de $2^n$ a aproximadamente $2^n/n$ ($18\,512\,792$ nodos para $n = 29$), y el cálculo de las 88 reglas con $n = 29$ tarda 36~s contra 884~s en el grafo completo. Para $n = 1, \dots, 9$ la partición coincide con la que se obtiene agrupando los grafos cociente con un algoritmo de isomorfismo.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\textwidth]{canonical_classes_combined_gpu.png}
+\caption{Número de formas canónicas distintas entre las 88 reglas representantes con el grafo de transición completo y con el grafo cociente por traslaciones, para $n = 1, \dots, 29$ (eje vertical en escala cúbica).}
+\label{fig:canonical-rot}
+\end{figure}
+
+\begin{table}
+\centering
+\caption{Número de clases con la forma canónica del grafo completo, del grafo cociente y de ambos en el mismo tamaño $n$. Desde $n = 7$ el patrón se repite con periodo 4, salvo las excepciones de la Tabla~\ref{tab:canonical-merges} y $n = 12, 24$ en la columna ``Ambos''.}
+\label{tab:canonical-rot}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{l*{12}{c}}
+\hline
+$n$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 \\
+\hline
+Completo & 3 & 9 & 40 & 82 & 82 & 85 & 82 & 84 & 85 & 85 & 85 & 84 \\
+Cociente & 3 & 6 & 16 & 46 & 66 & 83 & 80 & 84 & 80 & 85 & 80 & 84 \\
+Ambos    & 3 & 10 & 40 & 85 & 82 & \textbf{88} & 84 & 87 & 85 & \textbf{88} & 85 & \textbf{88} \\
+\hline
+\end{tabular}
+\end{table}
+
+Con el grafo cociente se obtienen menos clases (Figura~\ref{fig:canonical-rot} y Tabla~\ref{tab:canonical-rot}). Desde $n = 7$ el número depende solo de $n \bmod 4$: 80 clases si $n$ es impar, 85 si $n \equiv 2 \pmod 4$ y 84 si $4 \mid n$. Para todo $n \ge 6$ se agrupan \{12,34\}, \{15,51\} y \{170,204\}. En cada par una regla es la otra compuesta con la traslación: 204 es la identidad y 170 la traslación, $51 = \lnot c$ y $15 = \lnot l$, $12 = \lnot l \wedge c$ y $34 = \lnot c \wedge r$. En el cociente la traslación actúa como la identidad, así que estas reglas no se distinguen con ningún tamaño, y ni combinando los 29 tamaños se pasa de 85 clases. Además, con $n$ impar se agrupan \{3,5\}, \{24,46\}, \{60,90\}, \{136,160\} y \{10,12,34\}; con $n = 8, 16, 20, 28$, \{105,150\}; y con $n = 12, 24$, \{43,142\}.
+
+Las particiones del grafo completo y del cociente no están anidadas. Con $n$ impar (salvo $n = 7$) toda agrupación del grafo completo también ocurre en el cociente, pero con $n$ par cada uno separa pares que el otro agrupa: el grafo completo agrupa \{15,170\}, \{23,178\} y \{77,232\}, que el cociente separa, y el cociente agrupa \{12,34\}, \{15,51\} y \{170,204\}, que el grafo completo separa. Por eso, al usar ambas formas canónicas en el mismo espacio se distinguen los 88 comportamientos con $n = 6, 10, 12, 14, 18, 22, 24$ y $26$ (y 87 con $n = 8, 16, 20, 28$, donde ambos agrupan \{105,150\}). Es decir, un solo espacio de 6 células basta si se usan el grafo completo y su cociente, mientras que con el grafo completo solo se necesitan dos tamaños.
