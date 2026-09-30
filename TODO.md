@@ -1,6 +1,60 @@
 # TODO
 
-## Momentos espectrales con masa de atractor (idea del 2026-09-28, pendiente de implementar)
+## Paper: combinar las figuras de completo y cociente (pendiente, 2026-09-30)
+
+Requiere Mathematica (PC principal, con el MCP de Wolfram).
+
+### Problema
+
+En `Paper/sections/spectral_methods.tex` las figuras `fig:sm-classes` (momentos espectrales) y `fig:am-classes` (masa de atractor) tienen dos subfiguras, una para el grafo completo y otra para el cociente. En la versión de Overleaf cada subfigura está a `\textwidth` y juntas ocupan casi una página. Si se hacen más chicas, ya no se distinguen los valores.
+
+### Qué hacer
+
+Por cada método, generar **una sola gráfica** que junte ambos grafos:
+
+1. Momentos espectrales: `spectral_moments_gpu_data.wl` (completo) + `spectral_moments_rot_gpu_data.wl` (cociente).
+2. Masa de atractor: `attractor_mass_gpu_data.wl` (completo) + `attractor_mass_rot_gpu_data.wl` (cociente).
+
+No hay que recalcular nada. Cada archivo es una asociación `n -> <|"n" -> n, "Classes" -> <|10 -> c, 20 -> c, 30 -> c, 60 -> c|>, "Groups" -> ...|>` con n = 1..29, y basta con usar `"Classes"`.
+
+Estilo de cada gráfica:
+- Se grafican las 4 ventanas K = 10, 20, 30, 60 con los mismos colores y marcadores que las gráficas actuales (`Paper/figures/spectral_moments_classes_gpu.png`): azul con círculo, naranja con cuadrado, verde con rombo y rojo con triángulo.
+- El grafo completo va con **línea continua** y el cociente con **línea punteada**, del mismo color para cada K, como en `Paper/figures/all_methods_8_classes_gpu.png`.
+- Se conservan las líneas de referencia 88 (state permutation, mirror) y 81 (4 inheritance), el eje "Space size n" y las mismas marcas del eje y.
+- La leyenda tiene que ser compacta y no tapar datos. Sugerencia: poner debajo de la gráfica una fila con los colores de las K y otra con "solid = transition graph, dashed = rotation quotient".
+- La gráfica tiene que ser legible a `width=\textwidth` en LNCS (unos 12 cm): fuentes grandes y figura más ancha que alta.
+- Se exportan como PNG a `exports/` y se copian a `Paper/figures/` con los nombres `spectral_moments_classes_combined_gpu.png` y `attractor_mass_classes_combined_gpu.png`. Ya existen archivos con esos nombres, pero solo tienen K = 10 y el paper no los usa, así que se pueden sobrescribir.
+- El código va en `eigenvalues_method.nb`, junto a las secciones de momentos espectrales y de masa de atractor, siguiendo el estilo de la gráfica de los ocho métodos (`all_methods_8_classes_gpu.png`).
+
+Boceto sin probar:
+
+```wolfram
+full = Get["spectral_moments_gpu_data.wl"]; rot = Get["spectral_moments_rot_gpu_data.wl"];
+ks = {10, 20, 30, 60};
+series[d_, k_] := Table[{n, d[n]["Classes"][k]}, {n, 1, 29}];
+cols = ColorData[97] /@ Range[4];
+ListLinePlot[
+  Join[series[full, #] & /@ ks, series[rot, #] & /@ ks],
+  PlotStyle -> Join[cols, Directive[#, Dashed] & /@ cols],
+  PlotMarkers -> Automatic, ...]
+```
+
+### Cambio en el LaTeX
+
+Sustituir cada figura de dos subfiguras por una sola imagen. La versión que manda es la de Overleaf, que el 2026-09-30 se estaba editando y todavía no estaba en el repo; antes de empezar, verificar que `Paper/` ya esté sincronizado con Overleaf. Hay que conservar los labels que use esa versión: allá la figura de masa de atractor tenía `fig:aclasses` y en el repo tenía `fig:am-classes`. Luego revisar que las `\ref` coincidan. La figura de momentos espectrales tenía `\caption{}` vacío en Overleaf, así que hay que ponerle un caption.
+
+```latex
+\begin{figure}
+\centering
+\includegraphics[width=\textwidth]{spectral_moments_classes_combined_gpu.png}
+\caption{Número de vectores de momentos espectrales distintos entre las 88 reglas representantes para $n = 1, \dots, 29$ y $K = 10, 20, 30, 60$, en el grafo completo (línea continua) y en el grafo cociente (línea punteada).}
+\label{fig:sm-classes}
+\end{figure}
+```
+
+La de masa de atractor queda igual, con `attractor_mass_classes_combined_gpu.png` y `\label{fig:am-classes}`. Después hay que compilar y revisar que el paper siga cabiendo en 12 páginas.
+
+## Momentos espectrales con masa de atractor (idea del 2026-09-28; ya implementada en el commit 03a7db8)
 
 Requiere Mathematica (hacerlo en la PC, en `eigenvalues_method.nb`).
 
