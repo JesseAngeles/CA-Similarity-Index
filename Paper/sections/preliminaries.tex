@@ -23,7 +23,7 @@ El orden de la tupla $\mathcal{N}$ es relevante: determina la numeración de las
 
 \subsection{Espacio finito y condiciones de frontera}
 
-Idealmente, los autómatas celulares evolucionan en espacios infinitos; sin embargo, en la práctica se establecen fronteras que restringen el espacio celular~\cite{bhattacharjee2019_ca,ponce2015_ca}. La condición de frontera puede ser abierta (se asigna un estado fijo a los vecinos faltantes) o periódica (los vecinos faltantes de una célula en la frontera son las células de la frontera opuesta)~\cite{ponce2015_ca}. Un autómata infinito con una configuración periódica equivale a un autómata finito con frontera periódica~\cite{bhattacharjee2019_ca}.
+Idealmente, los autómatas celulares evolucionan en espacios infinitos; sin embargo, en la práctica se establecen fronteras que restringen el espacio celular~\cite{bhattacharjee2019_ca,ponce2015_ca}. La condición de frontera puede ser abierta (se asigna un estado fijo a los vecinos faltantes) o periódica (los vecinos faltantes de una célula en la frontera son las células de la frontera opuesta) \cite{ponce2015_ca}, \cite{bhattacharjee2019_ca}.
 
 En este trabajo se utiliza siempre frontera periódica. En una dimensión, el espacio es un anillo de $n$ células, $\mathcal{L} = \mathbb{Z}_n$.
 
@@ -33,11 +33,8 @@ Para autómatas celulares unidimensionales con radio $r$, la vecindad contiene a
 \[
 \sigma_i(t + 1) = \mathcal{R}(\sigma_{i-r}(t), \dots, \sigma_i(t), \dots, \sigma_{i+r}(t)), \quad \mathcal{R} : \mathcal{S}^{2r+1} \to \mathcal{S}.
 \]
-Para vecindades de tamaño par se usa radio $r = 1/2$, con la convención $\mathcal{N} = (-1, 0)$: la célula depende de su vecina izquierda y de sí misma.
 
 El autómata celular elemental (ECA) considera $k = 2$, radio $r = 1$ ($m = 3$) y la regla $\mathcal{R} : \{0,1\}^3 \to \{0,1\}$. Existen $k^{m} = 2^3 = 8$ patrones posibles en la vecindad y a cada uno se le asigna un nuevo estado, por lo que el número total de reglas es $k^{k^{m}} = 2^8 = 256$. Cada regla se identifica con un número decimal leyendo como número binario los estados asignados a los patrones $111, 110, \dots, 000$.
-
-Nótese que el número de regla solo es único cuando $m$ y $k$ son fijos: dos reglas que difieren en vecindad o en número de estados pueden compartir el mismo número.
 
 \subsection{Función global y grafo de transición}
 
@@ -46,7 +43,7 @@ Sea $\mathcal{C} = \mathcal{S}^{\mathcal{L}}$ el conjunto de configuraciones, co
   F(\sigma)_{\vec{i}} = \mathcal{R}\left(\sigma_{\vec{i}+\vec{v}_1}, \dots, \sigma_{\vec{i}+\vec{v}_m}\right), \quad \forall \vec{i} \in \mathcal{L}.
 \]
 
-El grafo de transición $G_F = (\mathcal{C}, E)$ tiene un nodo por configuración y una arista dirigida $\sigma \to F(\sigma)$. Como $F$ es una función, cada nodo tiene grado de salida 1 (grafo funcional); por lo tanto, cada componente conexa contiene exactamente un ciclo, que contiene un atractor del cual cuelgan árboles transitorios que forman su cuenca. Para cada $x \in \mathcal{C}$ definimos su periodo $p(x)$ como la longitud del ciclo al que llega, y su altura $h(x)$ como el mínimo número de pasos para alcanzarlo ($h(x) = 0$ si $x$ es periódica). Las configuraciones sin predecesor se conocen como Jardín del Edén. Denotamos por $A \in {0,1}^{N \times N}$ la matriz de adyacencia de $G_F$.
+El grafo de transición $G_F = (\mathcal{C}, E)$ tiene un nodo por configuración y una arista dirigida $\sigma \to F(\sigma)$. Como $F$ es una función, cada nodo tiene grado de salida 1 (grafo funcional). Cada componente conexa contiene exactamente un ciclo, que contiene un atractor del cual cuelgan árboles transitorios que forman su cuenca. Para cada $x \in \mathcal{C}$ definimos su periodo $p(x)$ como la longitud del ciclo al que llega, y su altura $h(x)$ como el mínimo número de pasos para alcanzarlo ($h(x) = 0$ si $x$ es periódica). Las configuraciones sin predecesor se conocen como Jardín del Edén. 
 
 \subsection{Cociente por traslaciones}
 \label{subsec:quotient}

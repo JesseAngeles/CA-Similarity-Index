@@ -1,87 +1,63 @@
 \section{Spectral methods}
 \label{sec:spectral}
 
-Los métodos de la Sección~\ref{sec:structural} solo responden si dos reglas son iguales o no. Para obtener una medida gradual, buscamos representar cada regla con un vector numérico derivado de su grafo de transición, de modo que la distancia entre vectores funcione como índice de similitud.
+Los metodos vistos solo distinguen la igualdad entre reglas. Para obtener una medida gradual, se busca representar cada regla como un vector numerico (embedding) derivado de su grado de transición, de tal manera que la distancia entre los vectores funcione como indice de similitud.
 
-\subsection{Eigenvalores}
+\subsection{Eigenvalues}
 
-En este método se calculan los eigenvalores de la matriz de adyacencia $A$ del grafo de transición, se ordenan y se usan como vector de características de la regla; dos reglas se comparan mediante la distancia coseno entre sus vectores. Si dos grafos son isomorfos, sus matrices de adyacencia son similares por una permutación y producen los mismos eigenvalores, por lo que la distancia es cero. En caso contrario, la distancia mide qué tan distintos son sus espectros. Con este método se obtienen 74 comportamientos distintos en ECA con un espacio de 18 células.
+En este método se calculan los eigenvalores de la matriz de adyacencia $A$ del grafo de transición, se ordenan y se usan como embedding de la regla: dos reglas se comparan mediante la distancia coseno entre sus vectores. Si dos grafos son isomorfos, sus matrices de adyacencia son similares por una permutación y producen los mismos eigenvalores, por lo que la distancia es cero. En caso contrario, la distancia mide qué tan distintos son sus espectros. Este método obtiene un máximo de 74 comportamientos (18 células) distintos en ECA.
 
-Esto explica las dos limitaciones principales del método.
+Este metodo tiene dos limitaciones:
 
-\paragraph{Ceguera a los transitorios.} Como los árboles transitorios solo aportan eigenvalores nulos, el espectro no distingue cómo se distribuyen las configuraciones en las cuencas ni cuántos pasos tardan en llegar al atractor. Por ejemplo, las reglas 0 y 8 de ECA no están relacionadas por ninguna de las relaciones de la Sección~\ref{sec:inheritance}, ni siquiera después de reducir vecinos, y sus grafos de transición no son isomorfos. Sin embargo, en ambas el único atractor es el punto fijo formado por puros ceros: en la regla 0 todas las configuraciones llegan a él en un paso, mientras que en la regla 8 algunas tardan dos. Ambas tienen el mismo espectro (un eigenvalor $1$ y $N - 1$ eigenvalores $0$), por lo que el método las considera idénticas. Este caso no es excepcional, lo que explica que el número de comportamientos distintos nunca alcance al obtenido con la forma canónica.
+\begin{table}[!htbp]
+    \centering
+    \begin{tabular}{p{0.15\textwidth} p{0.85\textwidth}}
+        Ceguera a los transitorios: &
+        Cada componente conexa tiene una cuenca y arboles transitorios. Como los árboles aportan eigenvalues nulos el espectro depende unicamente de comparar los atractores y no los árboles. Las reglas 0 y 8 de ECA no tienen ninguna relación mediante inheritance properties, Sin embargo, ambas tienen un único atractor de punto de fijo formado por puros ceros: 1 paso para la regla 0 y maximo 2 pasos para la regla 8, por lo que sus eigenvalues son identicos. \\
+        Dependencia del dominio: &
+        El número de eigenvalores es igual al número de nodos $N = |\mathcal{S}|^n$, por lo que solo se pueden comparar reglas con el mismo número de estados y el mismo tamaño de espacio.
+    \end{tabular}
+\end{table}
 
-\paragraph{Dependencia del dominio.} El número de eigenvalores es igual al número de nodos $N = |\mathcal{S}|^n$, por lo que solo se pueden comparar reglas con el mismo número de estados y el mismo tamaño de espacio.
+En el grafo completo el número de clases oscila entre 67 y 74 a partir de $n = 8$, con el máximo en $n = 18$ (Figura~\ref{fig:eigen-classes}. En todos los tamaños la partición por forma canónica es más fina que la del espectro. En el cociente se obtienen menos clases (entre 56 y 63 a partir de $n = 12$), pues además de la ceguera a los transitorios identifica cada regla con su composición con la traslación, como \{15,51\} y \{170,204\}. El cociente no aporta información al espectro, ademas, al combinar los 29 tamaños de ambos grafos se alcanza un limite de 77.
 
-\paragraph{Clases por eigenvalores.} Como el grafo de transición es funcional, un ciclo de longitud $L$ aporta exactamente las $L$ raíces $L$-ésimas de la unidad y cada nodo de los árboles aporta un eigenvalor $0$. Por lo tanto, no es necesario diagonalizar la matriz de $2^n \times 2^n$: el espectro queda determinado por el histograma de longitudes de ciclo, y dos reglas tienen el mismo espectro si y solo si tienen el mismo histograma. Con esto calculamos el espectro de las 88 reglas representantes para $n = 1, \dots, 29$, tanto en el grafo completo como en el grafo cociente por traslaciones (Sección~\ref{subsec:quotient}), usando la misma construcción en GPU que en la forma canónica. Para $n \le 8$ las particiones coinciden con las que se obtienen agrupando por el polinomio característico exacto.
-
-\begin{figure}
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{eigenvalue_classes_combined_gpu.png}
-\caption{Número de espectros distintos entre las 88 reglas representantes con el grafo de transición completo y con el grafo cociente por traslaciones, para $n = 1, \dots, 29$ (eje vertical en escala cúbica).}
+\caption{Número de espectros distintos entre las 88 reglas representantes con el grafo de transición completo y con el grafo cociente por traslaciones.}
 \label{fig:eigen-classes}
 \end{figure}
 
-\begin{table}
-\centering
-\caption{Número de espectros distintos entre las 88 reglas representantes con el grafo completo, con el grafo cociente y con ambos en el mismo tamaño $n$.}
-\label{tab:eigen-classes}
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{l*{15}{c}}
-\hline
-$n$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 \\
-Completo & 3 & 8 & 24 & 52 & 52 & 68 & 60 & 69 & 71 & 72 & 68 & 73 & 68 & 71 & 71 \\
-Cociente & 3 & 5 & 8 & 14 & 26 & 30 & 39 & 49 & 49 & 60 & 54 & 58 & 57 & 63 & 56 \\
-Ambos & 3 & 9 & 24 & 58 & 52 & 74 & 62 & 72 & 71 & 75 & 68 & 76 & 68 & 75 & 71 \\
-\hline
-$n$ & 16 & 17 & 18 & 19 & 20 & 21 & 22 & 23 & 24 & 25 & 26 & 27 & 28 & 29 & \\
-Completo & 69 & 68 & 74 & 68 & 71 & 71 & 72 & 67 & 73 & 68 & 72 & 71 & 70 & 68 & \\
-Cociente & 57 & 57 & 62 & 57 & 61 & 57 & 63 & 57 & 60 & 57 & 63 & 57 & 61 & 57 & \\
-Ambos & 72 & 68 & \textbf{77} & 68 & 74 & 71 & 75 & 67 & 76 & 68 & 75 & 71 & 74 & 68 & \\
-\hline
-\end{tabular}
-\end{table}
-
-En el grafo completo el número de clases oscila entre 67 y 74 a partir de $n = 8$, con el máximo en $n = 18$ (Figura~\ref{fig:eigen-classes} y Tabla~\ref{tab:eigen-classes}); en todos los tamaños la partición por forma canónica es más fina que la del espectro. En el cociente se obtienen aún menos clases (entre 56 y 63 a partir de $n = 12$), pues además de la ceguera a los transitorios identifica cada regla con su composición con la traslación, como \{15,51\} y \{170,204\}. A diferencia de la forma canónica, el cociente no aporta información al espectro: usando ambos espectros en el mismo tamaño se obtienen como máximo 77 clases ($n = 18$), y combinando los 29 tamaños y ambos grafos también se obtienen 77.
-
-Ningún tamaño del espacio permite distinguir los 88 comportamientos. En la regla 8 una célula vale 1 solo si su vecindad es $011$, así que después de un paso no quedan dos unos adyacentes y después de dos pasos todas las células valen 0: para todo $n$, $F_8^2(x) = 0$ y el único ciclo es el punto fijo $0$, igual que en la regla 0. Ambas tienen el mismo espectro para todo $n$, por lo que el método distingue a lo más 87 comportamientos. En los datos, los grupos \{0,8\}, \{1,19\}, \{2,24,46\}, \{4,12\}, \{18,126\}, \{36,72\}, \{128,136\}, \{130,152\}, \{132,140\} y \{162,168\} tienen el mismo espectro en todos los tamaños calculados ($n \le 29$, y también $n = 31$ en el grafo completo), lo que explica el máximo de 77: son reglas con los mismos ciclos que solo difieren en sus transitorios.
+Las relaciones: \{0,8\}, \{1,19\}, \{2,24,46\}, \{4,12\}, \{18,126\}, \{36,72\}, \{128,136\}, \{130,152\}, \{132,140\} y \{162,168\} tienen el mismo espectro en todos los tamaños calculados. Son reglas con los mismos ciclos que solo difieren en sus transitorios.
 
 \subsection{Momentos espectrales}
 
-Para resolver la dependencia del dominio proponemos usar los momentos espectrales. En lugar de calcular el espectro completo, para cada paso $k = 1, \dots, K$ se mide la proporción de configuraciones que regresan a sí mismas tras $k$ pasos:
+Para resolver la dependencia del dominio se propone usar momentos espectrales. En lugar de calcular el espectro completo, para cada paso $k = 1, \dots, K$ se mide la proporción de configuraciones que regresan a sí mismas tras $k$ pasos:
 \[
   m_k = \frac{|\{x \in \mathcal{C} : F^k(x) = x\}|}{N}
 \]
 
-La ventaja es que la longitud del vector es $K$ y no depende del tamaño del grafo, así que ahora es posible comparar reglas con distinto número de estados, vecindades o tamaños de espacio. Las reglas relacionadas por reducción de estados o de vecindad (Sección~\ref{sec:inheritance}) sirven como referencia para validar estas comparaciones entre dominios. La desventaja es que $K$ debe elegirse de modo que los ciclos relevantes de ambos grafos queden dentro de la ventana. Los vectores se comparan mediante la distancia coseno, que es nuestro índice de similitud.
+La longitud no depende del numero de nodos sino de la longitud del vector de tamaño $K$, por lo que se pueden comparar reglas con diferente numero de estados, vecinos o espacios. La desventaja es que $K$ debe elegirse de modo que los ciclos relevantes de ambos grafos queden dentro de la ventana. Los vectores se comparan mediante la distancia coseno, que es nuestro índice de similitud.
 
-En ECA, con el grafo cociente por rotaciones de 14 células y $K = 10$, se obtienen 63 vectores distintos para las 256 reglas.
+En ECA, con el grafo cociente por rotaciones de 14 células y $K = 10$, se obtienen 63 vectores distintos para las 256 reglas. Sin embargo, como $m_k$ solo depende de los eigenvalores, este método hereda la ceguera a los transitorios, las figuras \ref{fig:sub:completo} y \ref{fig:sub:cociente}.
 
-Sin embargo, como $m_k$ solo depende de los eigenvalores, este método hereda la ceguera a los transitorios: las reglas 0 y 8 tienen $m_k = 1/N$ para todo $k$.
-
-\paragraph{Clases por momentos espectrales.} Una configuración cumple $F^k(x) = x$ si y solo si está en un ciclo de longitud $L$ con $L \mid k$, así que $m_k = \frac{1}{N}\sum_{L \mid k} L\, c_L$, donde $c_L$ es el número de ciclos de longitud $L$. Por lo tanto, los momentos se obtienen en forma exacta del mismo histograma de ciclos que los eigenvalores. En el grafo cociente cada clase cuenta como un nodo y $N$ es el número de clases. La Figura~\ref{fig:sm-classes} muestra el número de vectores distintos entre las 88 reglas representantes para $n = 1, \dots, 29$ y varios valores de $K$.
-
-\begin{figure}
-\centering
-\begin{subfigure}{0.49\textwidth}
-\includegraphics[width=\textwidth]{spectral_moments_classes_gpu.png}
-\caption{Grafo completo.}
-\end{subfigure}
-\hfill
-\begin{subfigure}{0.49\textwidth}
-\includegraphics[width=\textwidth]{spectral_moments_classes_rot_gpu.png}
-\caption{Grafo cociente.}
-\end{subfigure}
-\caption{Número de vectores de momentos espectrales distintos entre las 88 reglas representantes para $n = 1, \dots, 29$ y $K = 10, 20, 30, 60$.}
-\label{fig:sm-classes}
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=1\linewidth]{spectral_moments_classes_gpu.png}
+    \caption{Número de vectores de momentos espectrales distintos entre las 88 reglas representantes para $n = 1, \dots, 29$ y $K = 10, 20, 30, 60$.}
+    \label{fig:placeholder}
 \end{figure}
 
-El resultado depende de la ventana $K$, pues un ciclo de longitud $L > K$ no aparece en el vector. En el grafo completo, con $K = 10$ los tamaños con ciclos largos pierden mucha información ($n = 11, 13, 17, 19, 23$ y $29$ dan entre 31 y 34 clases), mientras que los tamaños con muchos divisores dan hasta 72 ($n = 12$ y $24$). Al crecer $K$, el número de clases se acerca al de los eigenvalores sin superarlo, porque los momentos son una función del espectro; para alcanzarlo en tamaños primos se necesitan ventanas de miles o cientos de miles de pasos ($K = 475\,107$ con $n = 29$). En el cociente los ciclos que solo recorren rotaciones se vuelven puntos fijos, los ciclos restantes son cortos y $K$ casi no importa: con $K = 10$ se obtienen entre 54 y 63 clases desde $n = 13$, con el máximo de 63 en $n = 14$. Combinando los 29 tamaños se obtienen 77 clases en el grafo completo y 68 en el cociente, las mismas que con los eigenvalores, para cualquier $K$.
+Un ciclo de longitud $L > K$ no es captado en el vector. En el grafo completo, con $K = 10$ los tamaños con ciclos largos pierden información ($n = 11, 13, 17, 19, 23$ y $29$ con 31 y 34 clases), Los tamaños con muchos divisores dan hasta 72 ($n = 12$ y $24$). 
+
+En el cociente los ciclos se vuelven mas cortos y $K$ casi no importa: con $K = 10$ encuentra 54 y 63 clases desde $n = 13$, con un máximo de 63 en $n = 14$. 
+
+Combinando los 29 tamaños se obtienen 77 clases en el grafo completo y 68 en el cociente, las mismas que con los eigenvalores, para cualquier $K$.
 
 \subsection{Momentos espectrales con masa de atractor}
 \label{subsec:attractor_mass}
 
-Para distinguir reglas como la 0 y la 8 es necesario medir, además de los atractores, la fuerza con la que atraen a las demás configuraciones: cuántas configuraciones llegan a cada atractor y en cuántos pasos. La idea es que cada ciclo se siga activando cada $p$ pasos, como en los momentos espectrales, pero que en cada activación se sumen también las configuraciones que ya llegaron a él.
+Para distinguir reglas como la 0 y la 8 es necesario medir, además de los atractores, la fuerza con la que atraen a las demás configuraciones, es decir, cuantificar el numero de configuraciones que llegan a cada atractor y en cuántos pasos. La idea es que cada ciclo se siga activando cada $p$ pasos, como en los momentos espectrales, pero que en cada activación se sumen también las configuraciones que ya llegaron a él.
 
 Usando la altura $h(x)$ y el periodo $p(x)$ de cada configuración, definimos
 \[
@@ -102,53 +78,30 @@ Por ejemplo, con 5 células ($N = 32$), la regla 0 envía todas las configuracio
 \]
 que ya no son iguales, aunque sus momentos espectrales sí lo son.
 
-Un ejemplo con ciclos más largos es la regla 30 con 5 células (Fig.~\ref{fig:r30}). Su grafo tiene dos componentes: el punto fijo $0$, cuya cuenca es $\{0, 31\}$, y un ciclo de longitud 5 del que cuelgan cinco cadenas de cinco configuraciones cada una, con una cuenca de 30 configuraciones. En $k = 1$ solo cuenta el punto fijo, y desde $k = 2$ también la configuración 31. En $k = 5$ se activa por primera vez el ciclo y cuentan solo sus 5 nodos; en $k = 10$ cuentan además las 25 configuraciones transitorias, que llegaron al ciclo en a lo más 5 pasos:
-\[
-  \tilde{m}^{(30)} = \tfrac{1}{32}\,(1, 2, 2, 2, 7, 2, 2, 2, 2, 32, 2, 2, 2, 2, 32, \dots).
-\]
-Si alguna configuración tardara 7 pasos en llegar al ciclo de longitud 5, contaría hasta $k = 15$, la tercera activación.
+Este método tiene algunas limitaciones: La resolución con la que se mide la altura depende del periodo, pues las configuraciones se agrupan en intervalos de $p$ pasos: con periodos largos, una configuración con $h = 1$ y otra con $h = p$ cuentan en el mismo paso. Además, un ciclo con $p > K$ nunca se activa. 
 
-\begin{figure}
+\begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{r30_5celdas_grafo}
-    \caption{Grafo de transición de la regla 30 con 5 células.}
-    \label{fig:r30}
+    \includegraphics[width=1\linewidth]{attractor_mass_classes_gpu.png}
+    \caption{Número de vectores de momentos espectrales con masa de atractor distintos entre las 88 reglas representantes para $n = 1, \dots, 29$ y $K = 10, 20, 30, 60$.}
+    \label{fig:placeholder}
 \end{figure}
 
-Este método tiene algunas limitaciones. La resolución con la que se mide la altura depende del periodo, pues las configuraciones se agrupan en intervalos de $p$ pasos: con periodos largos, una configuración con $h = 1$ y otra con $h = p$ cuentan en el mismo paso. Además, un ciclo con $p > K$ nunca se activa. Finalmente, en la reducción de estados las configuraciones que contienen el estado eliminado son Jardín del Edén adicionales que llegan un paso más tarde y cambian la normalización $N$, por lo que es necesario verificar cómo se comportan los pares relacionados por esta reducción.
-
-\paragraph{Resultados.} Para calcular $\tilde{m}_k$ se obtienen la altura y el periodo de todas las configuraciones en un solo recorrido del arreglo de sucesores: cada camino se sigue hasta una configuración ya procesada o hasta cerrar un ciclo, y las alturas se asignan hacia atrás. Cada configuración cuenta desde el paso $p\,j_0$, con $j_0 = 1 + \lceil h/p \rceil$, así que basta acumular cuántas configuraciones hay con cada par $(p, j_0)$. Los vectores reproducen los ejemplos anteriores de las reglas 0, 8 y 30, y para $n \le 10$ coinciden con el cálculo directo de $h(x)$ y $p(x)$.
-
-\begin{figure}
-\centering
-\begin{subfigure}{0.49\textwidth}
-\includegraphics[width=\textwidth]{attractor_mass_classes_gpu.png}
-\caption{Grafo completo.}
-\end{subfigure}
-\hfill
-\begin{subfigure}{0.49\textwidth}
-\includegraphics[width=\textwidth]{attractor_mass_classes_rot_gpu.png}
-\caption{Grafo cociente.}
-\end{subfigure}
-\caption{Número de vectores de momentos espectrales con masa de atractor distintos entre las 88 reglas representantes para $n = 1, \dots, 29$ y $K = 10, 20, 30, 60$.}
-\label{fig:am-classes}
-\end{figure}
-
-Con la masa de atractor el número de clases aumenta considerablemente (Figura~\ref{fig:am-classes}). En el grafo completo, los tamaños con muchos divisores dan entre 80 y 83 clases con $K = 10$, contra un máximo de 74 con los eigenvalores y 72 con los momentos espectrales. Los tamaños con ciclos largos siguen dependiendo de la ventana ($n = 29$ da 52 clases con $K = 10$ y 81 con $K = 60$). En el cociente el número de clases depende solo de $n \bmod 4$ desde $n = 7$: con $K = 60$ se obtienen 74 clases si $n$ es impar, 80 si $n \equiv 2 \pmod 4$ (79 con $n = 18$) y 76 si $4 \mid n$.
+Con la masa de atractor el número de clases aumenta considerablemente (Figura~\ref{fig:sub:1_2}). En el grafo completo, los tamaños con muchos divisores dan entre 80 y 83 clases con $K = 10$, contra un máximo de 74 con los eigenvalores y 72 con los momentos espectrales. Los tamaños con ciclos largos siguen dependiendo de la ventana ($n = 29$ da 52 clases con $K = 10$ y 81 con $K = 60$). En el cociente el número de clases depende solo de $n \bmod 4$ desde $n = 7$: con $K = 60$ se obtienen 74 clases si $n$ es impar, 80 si $n \equiv 2 \pmod 4$ (79 con $n = 18$) y 76 si $4 \mid n$ (figura \ref{fig:sub:2_2}).
 
 Las reglas 0 y 8 quedan separadas para todo $n \ge 3$. Combinando los 29 tamaños se obtienen 86 clases en el grafo completo, y basta con dos tamaños pequeños (por ejemplo, $n = 3$ y $n = 6$). Solo dos pares quedan juntos. En \{1,19\} las alturas exactas son distintas (con $p = 2$, algunas configuraciones tienen $h = 1$ en una regla y $h = 2$ en la otra), pero caen en el mismo intervalo de $p$ pasos: es la limitación de resolución descrita arriba. En \{4,12\} la distribución conjunta de altura y periodo es idéntica y las reglas solo difieren en la forma de los árboles, que únicamente distingue la forma canónica. El cociente, en cambio, agrupa las reglas que difieren en componer con la traslación (\{15,51\}, \{170,204\}, \{4,12,34\}, \ldots) y solo alcanza 81 clases. Usando el grafo completo y el cociente en el mismo tamaño se obtienen 87 clases con $n = 6, 10, 12, 14, 18, 22, 24$ y $26$.
 
-\begin{figure}
+En la figura \ref{fig:all-methods} y en la tabla \ref{tab:methods} se observa la comparatva de todos los metodos. La forma canonica lidera en la representación de clases pero son los momentos espectrales con masa de atractor son el segundo mejor metodo que puede producir 87 clases en total, seguidos por los eigenvalues y los momentos espectrales simples. 
+
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth]{all_methods_8_classes_gpu.png}
-\caption{Número de clases entre las 88 reglas representantes con cada método, en el grafo completo (línea continua) y en el grafo cociente (línea punteada), para $n = 1, \dots, 29$. En los momentos se usa $K = 60$, el valor que da más clases: al aumentar $K$ el número de clases nunca disminuye.}
+\caption{Número de clases entre las 88 reglas representantes con cada método para $n = 1, \dots, 29$.}
 \label{fig:all-methods}
 \end{figure}
 
-\begin{table}
+\begin{table}[!htbp]
 \centering
-\caption{Número máximo de clases entre las 88 reglas representantes para $n = 1, \dots, 29$ ($K = 60$ en los momentos). ``Un tamaño'': mejor $n$; ``Todos'': combinando los 29 tamaños; ``Completo + cociente'': ambos grafos en el mismo $n$.}
-\label{tab:methods}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccccc}
 \hline
@@ -161,10 +114,6 @@ Momentos espectrales & 74 & 77 & 63 & 68 & 77 \\
 Masa de atractor & 83 & 86 & 80 & 81 & 87 \\
 \hline
 \end{tabular}
+\caption{Número máximo de clases entre las 88 reglas representantes. ``Un tamaño'': mejor $n$; ``Todos'': combina los 29 tamaños; ``Completo + cociente'': ambos grafos.}
+\label{tab:methods}
 \end{table}
-
-La Figura~\ref{fig:all-methods} y la Tabla~\ref{tab:methods} comparan los cuatro métodos. En todos los tamaños la forma canónica distingue al menos tantas reglas como los demás métodos, y los eigenvalores al menos tantas como los momentos espectrales. Con $K = 60$ la masa de atractor distingue al menos tantas reglas como los eigenvalores en todos los tamaños, tanto en el grafo completo como en el cociente; con $K = 10$ queda por debajo en los tamaños con ciclos largos ($n = 11, 13, 17, 19, 22, 23, 26$ y $29$). En los cuatro métodos el grafo completo distingue al menos tantas reglas como el cociente en cada tamaño; aun así, el cociente aporta información distinta, pues al usar ambos grafos en el mismo tamaño la forma canónica alcanza 88 clases y la masa de atractor 87. Los métodos espectrales no pueden pasar de 77 clases porque no ven los transitorios; la masa de atractor recupera casi toda la información de la forma canónica (86 de 88 clases), pero con un vector de longitud fija $K$ que permite comparar reglas de dominios distintos y medir una similitud gradual.
-
-% TODO: pendiente
-% - silhouette del clustering contra 0.254;
-% - comparación entre dominios (pares relacionados por reducción de estados y de vecindad).
