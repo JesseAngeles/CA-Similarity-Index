@@ -1,0 +1,76 @@
+\section{Structural comparison of transition graphs}
+\label{sec:structural}
+
+The relations obtained in Section~\ref{sec:inheritance} depend only on the rule vector. As an alternative, we propose to compare the global dynamics: we define a finite periodic space of $n$ cells, which contains $N = |\mathcal{S}|^n$ configurations. By evolving each of them, we obtain the transition graph $G_F$ of the rule.
+
+As a parallel method, all the translations of a configuration (Section~\ref{subsec:quotient}) are considered a single node, which yields a quotient graph with approximately $|\mathcal{S}|^n / n$ nodes.
+
+We then say that two rules have the same behavior if their transition graphs have the same topology, that is, if they are isomorphic.
+
+\subsection{Isomorphism and canonical form}
+
+The isomorphism comparison identifies exactly the rules related by state permutation and mirror rules, which confirms that the transition graph captures the similarity between rules.
+
+This process is computationally expensive. As an alternative, we use the canonical form of the transition graph: a topological encoding of a graph that does not depend on the node labels, so that two graphs are isomorphic if and only if their canonical forms are equal. The canonical form is built with Algorithm~\ref{alg:canonnical_form}.
+
+\begin{algorithm}
+\caption{Canonical form of a transition diagram}
+\begin{algorithmic}[1]
+\State Add every Garden of Eden node to a queue $Q$
+\While{$Q$ is not empty}
+    \State Pop $v$ from $Q$ and assign it as code the sorted list of the codes of its predecessors
+    \State Add the code of $v$ to the predecessors of its successor $s(v)$
+    \If{$s(v)$ has no unprocessed predecessors}
+        \State Add $s(v)$ to $Q$
+    \EndIf
+\EndWhile
+\State Encode each cycle (nodes that never entered $Q$) as its lexicographically smallest rotation
+\State \Return the sorted list of the codes of all cycles
+\end{algorithmic}
+\label{alg:canonnical_form}
+\end{algorithm}
+
+These methods have three main restrictions:
+\begin{enumerate}
+    \item The comparison is binary.
+    \item The comparison is between rules of the same domain.
+    \item The result depends on the size $n$ of the space (see Figure~\ref{fig:canonical-rot}).
+\end{enumerate}
+
+In ECA, the number of classes grows with $n$ up to a limit that oscillates between 75 and 88 behaviors (Figure~\ref{fig:canonical-rot}):
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c p{0.8\textwidth}}
+        Full: &
+        At least 4 cells are needed to distinguish 82 behaviors and 6 for the maximum of 85. The groupings depend on whether the space is even or odd. From $n = 8$ on, some patterns appear: even $n$ groups \{15,170\}, \{23,178\} and \{77,232\}, $n$ multiple of 4 groups \{105,150\}, odd $n$ groups \{10,34\}, \{24,46\} and \{136,160\}, and $n = 7$ and $n = 23$ group \{60,90\}. Combining two sizes greater than 5 (one even and one odd) yields the 88 classes. They are also obtained with $n = 3$ and $n = 4$.
+         \\
+        Quotient: &
+        At least 6 cells are needed to distinguish 83 behaviors and 9 for the maximum of 85. From $n = 7$ on, the number depends only on $n \bmod 4$: 80 classes if $n$ is odd, 85 if $n \equiv 2 \pmod 4$ and 84 if $4 \mid n$. For every $n \ge 6$ it groups \{12,34\}, \{15,51\} and \{170,204\}.
+    \end{tabular}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\textwidth]{canonical_classes_combined_gpu.png}
+\caption{Number of canonical forms among the 88 classes with the full transition graph and the quotient by translations (the $y$ axis is on a cubic scale).}
+\label{fig:canonical-rot}
+\end{figure}
+
+The partitions of the full graph and of the quotient are not nested. With odd $n$, the grouping of the full graph also occurs in the quotient, but with even $n$ each one separates pairs that the other groups. Therefore, using both canonical forms on the same space distinguishes the 88 behaviors with $n = 6, 10, 12, 14, 18, 22, 24$ and $26$. That is, a single space of 6 cells is enough if both the full graph and its quotient are used (Table~\ref{tab:canonical-rot}).
+
+\begin{table}[H]
+\centering
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{l*{12}{c}}
+\hline
+$n$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 \\
+\hline
+Full & 3 & 9 & 40 & 82 & 82 & 85 & 82 & 84 & 85 & 85 & 85 & 84 \\
+Quotient & 3 & 6 & 16 & 46 & 66 & 83 & 80 & 84 & 80 & 85 & 80 & 84 \\
+Both    & 3 & 10 & 40 & 85 & 82 & \textbf{88} & 84 & 87 & 85 & \textbf{88} & 85 & \textbf{88} \\
+\hline
+\end{tabular}
+\caption{Number of classes with the canonical form of the full graph, of the quotient, and of both.}
+\label{tab:canonical-rot}
+\end{table}

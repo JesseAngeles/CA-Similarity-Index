@@ -1,0 +1,51 @@
+\section{Preliminaries}
+
+Cellular automata are a collection of cells arranged in a lattice, where each cell takes a state from a finite set. The system evolves in discrete time steps and, at each step, all cells update their state synchronously as a function of the states of their neighboring cells \cite{weisstein2002_ca,wolfram1982_ca,fsancho2016_ca}.
+
+\begin{definition}
+\label{def:ca}
+A cellular automaton is a 4-tuple $(\mathcal{L}, \mathcal{S}, \mathcal{N}, \mathcal{R})$ where:
+\begin{itemize}
+    \item $\mathcal{L} \subseteq \mathbb{Z}^D$ is the $D$-dimensional cellular space. Each cell is identified by a vector $\vec{i} \in \mathcal{L}$ that represents its position in the space.
+
+    \item $\mathcal{S} = \{0, 1, \dots, k-1\}$ is the finite set of $k$ states. The state of cell $\vec{i}$ at time $t$ is denoted by $\sigma_{\vec{i}}(t) \in \mathcal{S}$.
+
+    \item $\mathcal{N} = (\vec{v}_1, \vec{v}_2, \dots, \vec{v}_m)$ is the ordered tuple of the $m$ displacement vectors that define the neighborhood. The neighbors of cell $\vec{i}$ are located at positions $\vec{i} + \vec{v}_j$, with $j = 1, \dots, m$.
+
+    \item $\mathcal{R} : \mathcal{S}^m \to \mathcal{S}$ is the local rule, which assigns the new state of a cell from the states of its $m$ neighbors:
+    \[
+    \sigma_{\vec{i}}(t + 1) = \mathcal{R}\left( \sigma_{\vec{i} + \vec{v}_1}(t), \dots, \sigma_{\vec{i} + \vec{v}_m}(t) \right).
+    \]
+\end{itemize}
+\end{definition}
+
+The order of the tuple $\mathcal{N}$ matters: it determines the numbering of the rules and allows us to define relations such as mirror rules (Section~\ref{subsection:rules_same_domain}).
+
+\subsection{Finite space and boundary conditions}
+
+Ideally, cellular automata evolve in infinite spaces; in practice, however, boundaries are imposed that restrict the cellular space~\cite{bhattacharjee2019_ca,ponce2015_ca}. The boundary condition can be open (a fixed state is assigned to the missing neighbors) or periodic (the missing neighbors of a cell on the boundary are the cells on the opposite boundary) \cite{ponce2015_ca,bhattacharjee2019_ca}.
+
+Throughout this work we always use periodic boundaries. In one dimension, the space is a ring of $n$ cells, $\mathcal{L} = \mathbb{Z}_n$.
+
+\subsection{Neighborhoods and rules}
+
+For one-dimensional cellular automata with radius $r$, the neighborhood contains every cell at distance at most $r$, including the cell itself ($m = 2r + 1$), and the local rule is written as
+\[
+\sigma_i(t + 1) = \mathcal{R}(\sigma_{i-r}(t), \dots, \sigma_i(t), \dots, \sigma_{i+r}(t)), \quad \mathcal{R} : \mathcal{S}^{2r+1} \to \mathcal{S}.
+\]
+
+The elementary cellular automaton (ECA) has $k = 2$, radius $r = 1$ ($m = 3$) and rule $\mathcal{R} : \{0,1\}^3 \to \{0,1\}$. There are $k^{m} = 2^3 = 8$ possible neighborhood patterns and each one is assigned a new state, so the total number of rules is $k^{k^{m}} = 2^8 = 256$. Each rule is identified by a decimal number obtained by reading, as a binary number, the states assigned to the patterns $111, 110, \dots, 000$.
+
+\subsection{Global function and transition graph}
+
+Let $\mathcal{C} = \mathcal{S}^{\mathcal{L}}$ be the set of configurations, with $N = |\mathcal{C}| = k^{|\mathcal{L}|}$. The global function $F : \mathcal{C} \to \mathcal{C}$ applies the local rule to all cells synchronously:
+\[
+  F(\sigma)_{\vec{i}} = \mathcal{R}\left(\sigma_{\vec{i}+\vec{v}_1}, \dots, \sigma_{\vec{i}+\vec{v}_m}\right), \quad \forall \vec{i} \in \mathcal{L}.
+\]
+
+The transition graph $G_F = (\mathcal{C}, E)$ has one node per configuration and a directed edge $\sigma \to F(\sigma)$. Since $F$ is a function, every node has out-degree 1 (a functional graph). Each connected component contains exactly one cycle, the attractor, from which transient trees hang and form its basin. For each $x \in \mathcal{C}$ we define its period $p(x)$ as the length of the cycle it reaches, and its height $h(x)$ as the minimum number of steps needed to reach it ($h(x) = 0$ if $x$ is periodic). Configurations without a predecessor are known as Garden of Eden configurations.
+
+\subsection{Quotient by translations}
+\label{subsec:quotient}
+
+Let $T$ be the translation by one position in $\mathcal{L}$ (a rotation of the ring $\mathbb{Z}_n$). With periodic boundaries, the global function commutes with the translation, $F \circ T = T \circ F$, so two configurations that differ by a translation have equivalent trajectories. This allows us to build the quotient graph, whose nodes are the classes of configurations under translation and whose edges are $[x] \to [F(x)]$. All configurations in the same class have the same height, and the number of nodes drops to approximately $N/|\mathcal{L}|$. When proportions are computed on the quotient graph, each class is weighted by its size.
