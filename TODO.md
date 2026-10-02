@@ -1,5 +1,20 @@
 # TODO
 
+## Experimentos de la masa de atractor y paper completo en español (hecho el 2026-10-01)
+
+Código en `experimentos_masa_atractor.nb` (se evalúa completo en unos 30 s si existe `cross_domain_am_data.wl`; sin ese archivo recalcula unos 15 min). Resultados en la Sección 6 de `Paper/sections/experiments.tex`; figuras `attractor_mass_size_identification.png` y `attractor_mass_clusters_n12.png` en `exports/` y `Paper/figures/`.
+
+- Relaciones entre dominios (n = 12): permutación y espejo con m impar dan d = 0; espejo con m = 2 y reducción de vecindad con desplazamiento solo dan 0 en el cociente; la reducción de estados nunca da 0 (mediana 0.083 completo, 0.010 cociente).
+- Misma regla en distintos tamaños: se identifica como la más cercana en el 25% (completo) y 33% (cociente) de los pares de tamaños.
+- d(0, 8) = 0.0072 con n = 12 y K = 60 (0.048 con K = 10).
+- Agrupamiento: k-medoides con 4 grupos (punto fijo, periodo n, periodo 2, periodos largos), silueta 0.70.
+
+Pendiente:
+- La definición de reducción de estados del paper se cambió para que coincida con `DeleteState` (el estado eliminado es el más alto, nunca se produce y toda vecindad que lo contiene produce 0). La versión de Overleaf decía "a se comporta igual que b". Confirmar cuál se queda; con k = 2 ambas dan las mismas relaciones (solo la regla 0).
+- `Paper_en/` no tiene todavía las secciones nuevas (resumen, experimentos, conclusiones) ni las correcciones de esta versión.
+- El paper en español tiene 19 páginas (límite LNCS: 12).
+- Idea abierta: normalizar la masa de atractor para que sea invariante ante la reducción de estados (los momentos espectrales simples sí lo son).
+
 ## Paper: combinar las figuras de completo y cociente (idea del 2026-09-30; ya implementada)
 
 Requiere Mathematica (PC principal, con el MCP de Wolfram).

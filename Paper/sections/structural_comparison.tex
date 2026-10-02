@@ -1,17 +1,17 @@
 \section{Structural comparison of transition graphs}
 \label{sec:structural}
 
-Las relaciones obtenidas en la sección \ref{sec:inheritance} dependen unicamente del vector de regla. Como alternativa se propone comparar la dinamica global: Definir un espacio finito periodico de $n$ células, el cual contiene $N = |\mathcal{S}|^n$ configuraciones. Al evolucionar cada una de ellas, obtenemos un grafo de transición $G_F$ de la regla. 
+Las relaciones obtenidas en la Sección~\ref{sec:inheritance} dependen únicamente del vector de regla. Como alternativa, se propone comparar la dinámica global: se define un espacio finito periódico de $n$ células, el cual contiene $N = |\mathcal{S}|^n$ configuraciones. Al evolucionar cada una de ellas, obtenemos el grafo de transición $G_F$ de la regla.
 
-Como metodo paralelo, se consideran todas las traslaciones de una configuración (sección \ref{subsec:quotient}) como un unico nodo, lo que produce un grafo cociente con aproximadamente $|\mathcal{S}|^n / n$ nodos. 
+Como método paralelo, se consideran todas las traslaciones de una configuración (Sección~\ref{subsec:quotient}) como un único nodo, lo que produce un grafo cociente con aproximadamente $|\mathcal{S}|^n / n$ nodos.
 
-Decimos entonces que dos reglas tienen el mismo comportamiento si sus grafos de transición tienen la misma topología, es decir, si son isomorfos. 
+Decimos entonces que dos reglas tienen el mismo comportamiento si sus grafos de transición tienen la misma topología, es decir, si son isomorfos.
 
 \subsection{Isomorfismo y forma canónica}
 
-La comparación isomorfíca identifica con total exactitud las reglas por permutación y las reglas espejos, corroborando que el grafo de transición representa la similitud entre reglas. 
+La comparación por isomorfismo identifica con total exactitud las reglas relacionadas por permutación de estados y las reglas espejo, lo que corrobora que el grafo de transición representa la similitud entre reglas.
 
-Este proceso es computacionalmente costoso. Se usa la representación del grafo de transición en su forma canonica como alternativa: codificación topologica de un grafo que no depende de las etiquetas de los nodos, de modo que dos grafos son isomorficos si y solo si sus formas canonicas sin iguales. La construcción de la forma canonica esta dada por el algoritmo \ref{alg:canonnical_form}.
+Este proceso es computacionalmente costoso. Como alternativa, se usa la representación del grafo de transición en su forma canónica: una codificación topológica del grafo que no depende de las etiquetas de los nodos, de modo que dos grafos son isomorfos si y solo si sus formas canónicas son iguales. La construcción de la forma canónica está dada por el Algoritmo~\ref{alg:canonnical_form}.
 
 \begin{algorithm}
 \caption{Forma canónica de un diagrama de transiciones}
@@ -34,30 +34,30 @@ Estos métodos tienen tres restricciones principales:
 \begin{enumerate}
     \item La comparación es binaria.
     \item La comparación es entre reglas del mismo dominio.
-    \item El resultado depende del tamaño del espacio $n$ (ver figura \ref{fig:canonical-rot})
+    \item El resultado depende del tamaño del espacio $n$ (ver Figura~\ref{fig:canonical-rot}).
 \end{enumerate}
 
-En ECA, el numero de clases crece con $n$ hasta un limite que oscila entre 75 y 88 comportamientos (figura \ref{fig:canonical-rot}):
+En ECA, el número de clases crece con $n$ hasta un límite que oscila entre 80 y 85 comportamientos, y llega a 88 al combinar tamaños o ambos grafos (Figura~\ref{fig:canonical-rot}):
 
 \begin{table}[H]
     \centering
     \begin{tabular}{c p{0.8\textwidth}}
-        Completo: &  
-        Minimo de 4 células para distinguir 82 comportamientos y 6 para el maximo de 85. Las agrupaciones dependen si el espacio es par o impar. A partir de $n = 8$ se siguen algunos patrones: $n$ par agrupa \{15,170\}, \{23,178\} y \{77,232\}, $n$ múltiplo de 4 agrupa \{105,150\}, $n$ impar agrupa \{10,34\}, \{24,46\} y \{136,160\} y con $n = 7$ y $n = 23$ se agrupa \{60,90\}. Al combinar 2 tamaños mayores a 5 (par e impar) obrenemos las 88 clases. Tambien se obtienen con $n = 3$ y $n = 4$.
+        Completo: &
+        Se necesitan al menos 4 células para distinguir 82 comportamientos y 6 para el máximo de 85. Las agrupaciones dependen de si el tamaño del espacio es par o impar. A partir de $n = 8$ se repiten algunos patrones: con $n$ par se agrupan \{15,170\}, \{23,178\} y \{77,232\}; con $n$ múltiplo de 4, además, \{105,150\}; con $n$ impar se agrupan \{10,34\}, \{24,46\} y \{136,160\}, y con $n = 7$ y $n = 23$ se agrupa \{60,90\}. Al combinar dos tamaños mayores a 5 (uno par y uno impar) obtenemos las 88 clases. También se obtienen con $n = 3$ y $n = 4$.
          \\
         Cociente: &
-        Minimo de 6 celulas para distinguir 83 comportamientos y 9 para el maximo de 85. A partir de $n = 7$ el número depende solo de $n \bmod 4$: 80 clases si $n$ es impar, 85 si $n \equiv 2 \pmod 4$ y 84 si $4 \mid n$. Para todo $n \ge 6$ se agrupan \{12,34\}, \{15,51\} y \{170,204\}.
+        Se necesitan al menos 6 células para distinguir 83 comportamientos y 9 para el máximo de 85. A partir de $n = 7$ el número depende solo de $n \bmod 4$: 80 clases si $n$ es impar, 85 si $n \equiv 2 \pmod 4$ y 84 si $4 \mid n$. Para todo $n \ge 6$ se agrupan \{12,34\}, \{15,51\} y \{170,204\}.
     \end{tabular}
 \end{table}
-    
+
 \begin{figure}
 \centering
 \includegraphics[width=0.85\textwidth]{canonical_classes_combined_gpu.png}
-\caption{Número de formas canónicas entre las 88 clases con el grafo de transición completo y cociente por traslaciones (Eje $y$ es escala cubica).}
+\caption{Número de formas canónicas entre las 88 clases con el grafo de transición completo y con el cociente por traslaciones (el eje $y$ está en escala cúbica).}
 \label{fig:canonical-rot}
 \end{figure}
 
-Las particiones del grafo completo y del cociente no están anidadas. Con $n$ impar, la agrupación del grafo completo también ocurre en el cociente, pero con $n$ par cada uno separa pares que el otro agrupa. Por eso, al usar ambas formas canónicas en el mismo espacio se distinguen los 88 comportamientos con $n = 6, 10, 12, 14, 18, 22, 24$ y $26$. Es decir, un solo espacio de 6 células basta si se usan el grafo completo y su cociente (tabla \ref{tab:canonical-rot}).
+Las particiones del grafo completo y del cociente no están anidadas. Con $n$ impar, las agrupaciones del grafo completo también ocurren en el cociente, pero con $n$ par cada uno separa pares que el otro agrupa. Por eso, al usar ambas formas canónicas en el mismo espacio se distinguen los 88 comportamientos con $n = 6, 10, 12, 14, 18, 22, 24$ y $26$. Es decir, un solo espacio de 6 células basta si se usan el grafo completo y su cociente (Tabla~\ref{tab:canonical-rot}).
 
 \begin{table}[H]
 \centering
@@ -71,6 +71,6 @@ Cociente & 3 & 6 & 16 & 46 & 66 & 83 & 80 & 84 & 80 & 85 & 80 & 84 \\
 Ambos    & 3 & 10 & 40 & 85 & 82 & \textbf{88} & 84 & 87 & 85 & \textbf{88} & 85 & \textbf{88} \\
 \hline
 \end{tabular}
-\caption{Número de clases con la forma canónica del grafo completo, cociente y de ambos.}
+\caption{Número de clases con la forma canónica del grafo completo, del cociente y de ambos.}
 \label{tab:canonical-rot}
 \end{table}

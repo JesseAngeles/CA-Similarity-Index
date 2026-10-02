@@ -23,7 +23,7 @@ El orden de la tupla $\mathcal{N}$ es relevante: determina la numeración de las
 
 \subsection{Espacio finito y condiciones de frontera}
 
-Idealmente, los autómatas celulares evolucionan en espacios infinitos; sin embargo, en la práctica se establecen fronteras que restringen el espacio celular~\cite{bhattacharjee2019_ca,ponce2015_ca}. La condición de frontera puede ser abierta (se asigna un estado fijo a los vecinos faltantes) o periódica (los vecinos faltantes de una célula en la frontera son las células de la frontera opuesta) \cite{ponce2015_ca}, \cite{bhattacharjee2019_ca}.
+Idealmente, los autómatas celulares evolucionan en espacios infinitos; sin embargo, en la práctica se establecen fronteras que restringen el espacio celular~\cite{bhattacharjee2019_ca,ponce2015_ca}. La condición de frontera puede ser abierta (se asigna un estado fijo a los vecinos faltantes) o periódica (los vecinos faltantes de una célula en la frontera son las células de la frontera opuesta)~\cite{ponce2015_ca,bhattacharjee2019_ca}.
 
 En este trabajo se utiliza siempre frontera periódica. En una dimensión, el espacio es un anillo de $n$ células, $\mathcal{L} = \mathbb{Z}_n$.
 
@@ -34,7 +34,9 @@ Para autómatas celulares unidimensionales con radio $r$, la vecindad contiene a
 \sigma_i(t + 1) = \mathcal{R}(\sigma_{i-r}(t), \dots, \sigma_i(t), \dots, \sigma_{i+r}(t)), \quad \mathcal{R} : \mathcal{S}^{2r+1} \to \mathcal{S}.
 \]
 
-El autómata celular elemental (ECA) considera $k = 2$, radio $r = 1$ ($m = 3$) y la regla $\mathcal{R} : \{0,1\}^3 \to \{0,1\}$. Existen $k^{m} = 2^3 = 8$ patrones posibles en la vecindad y a cada uno se le asigna un nuevo estado, por lo que el número total de reglas es $k^{k^{m}} = 2^8 = 256$. Cada regla se identifica con un número decimal leyendo como número binario los estados asignados a los patrones $111, 110, \dots, 000$.
+El autómata celular elemental (ECA) considera $k = 2$, radio $r = 1$ ($m = 3$) y la regla $\mathcal{R} : \{0,1\}^3 \to \{0,1\}$. Existen $k^{m} = 2^3 = 8$ patrones posibles en la vecindad y a cada uno se le asigna un nuevo estado, por lo que el número total de reglas es $k^{k^{m}} = 2^8 = 256$. Cada regla se identifica con un número decimal leyendo como número binario los estados asignados a los patrones $111, 110, \dots, 000$~\cite{Wolfram2002_nks}.
+
+En general, denotamos por $r_{k,m}$ a la regla número $r$ con $k$ estados y $m$ vecinos, numerada de la misma forma en base $k$; así, las ECA son las reglas $r_{2,3}$. Cuando $m$ es par la vecindad no puede ser simétrica: con $m = 2$ usamos las células $(i-1, i)$, que es la convención de \textit{Mathematica} para el radio $r = 1/2$.
 
 \subsection{Función global y grafo de transición}
 
@@ -43,9 +45,9 @@ Sea $\mathcal{C} = \mathcal{S}^{\mathcal{L}}$ el conjunto de configuraciones, co
   F(\sigma)_{\vec{i}} = \mathcal{R}\left(\sigma_{\vec{i}+\vec{v}_1}, \dots, \sigma_{\vec{i}+\vec{v}_m}\right), \quad \forall \vec{i} \in \mathcal{L}.
 \]
 
-El grafo de transición $G_F = (\mathcal{C}, E)$ tiene un nodo por configuración y una arista dirigida $\sigma \to F(\sigma)$. Como $F$ es una función, cada nodo tiene grado de salida 1 (grafo funcional). Cada componente conexa contiene exactamente un ciclo, que contiene un atractor del cual cuelgan árboles transitorios que forman su cuenca. Para cada $x \in \mathcal{C}$ definimos su periodo $p(x)$ como la longitud del ciclo al que llega, y su altura $h(x)$ como el mínimo número de pasos para alcanzarlo ($h(x) = 0$ si $x$ es periódica). Las configuraciones sin predecesor se conocen como Jardín del Edén. 
+El grafo de transición $G_F = (\mathcal{C}, E)$ tiene un nodo por configuración y una arista dirigida $\sigma \to F(\sigma)$. Como $F$ es una función, cada nodo tiene grado de salida 1 (grafo funcional). Cada componente conexa contiene exactamente un ciclo, el atractor, del cual cuelgan árboles transitorios que junto con él forman su cuenca de atracción. Para cada $x \in \mathcal{C}$ definimos su periodo $p(x)$ como la longitud del ciclo al que llega, y su altura $h(x)$ como el mínimo número de pasos para alcanzarlo ($h(x) = 0$ si $x$ es periódica). Las configuraciones sin predecesor se conocen como Jardín del Edén.
 
 \subsection{Cociente por traslaciones}
 \label{subsec:quotient}
 
-Sea $T$ la traslación de una posición en $\mathcal{L}$ (una rotación en el anillo $\mathbb{Z}_n$). Con frontera periódica, la función global conmuta con la traslación, $F \circ T = T \circ F$, por lo que dos configuraciones que difieren por una traslación tienen trayectorias equivalentes. Esto permite construir el grafo cociente, cuyos nodos son las clases de configuraciones bajo traslación y cuyas aristas son $[x] \to [F(x)]$. Todas las configuraciones de una misma clase tienen la misma altura, y el número de nodos se reduce aproximadamente a $N/|\mathcal{L}|$. Cuando se calculen proporciones sobre el grafo cociente, cada clase se pondera por su tamaño.
+Sea $T$ la traslación de una posición en $\mathcal{L}$ (una rotación en el anillo $\mathbb{Z}_n$). Con frontera periódica, la función global conmuta con la traslación, $F \circ T = T \circ F$, por lo que dos configuraciones que difieren por una traslación tienen trayectorias equivalentes. Esto permite construir el grafo cociente, cuyos nodos son las clases de configuraciones bajo traslación y cuyas aristas son $[x] \to [F(x)]$. Todas las configuraciones de una misma clase tienen la misma altura, y el número de nodos se reduce aproximadamente a $N/|\mathcal{L}|$. En el grafo cociente cada clase cuenta como un solo nodo, por lo que las proporciones calculadas sobre él se normalizan por el número de clases.

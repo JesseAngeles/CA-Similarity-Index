@@ -1,25 +1,25 @@
 \section{Spectral methods}
 \label{sec:spectral}
 
-Los metodos vistos solo distinguen la igualdad entre reglas. Para obtener una medida gradual, se busca representar cada regla como un vector numerico (embedding) derivado de su grado de transición, de tal manera que la distancia entre los vectores funcione como indice de similitud.
+Los métodos vistos solo distinguen la igualdad entre reglas. Para obtener una medida gradual, se busca representar cada regla como un vector numérico (\emph{embedding}) derivado de su grafo de transición, de tal manera que la distancia entre los vectores funcione como índice de similitud.
 
-\subsection{Eigenvalues}
+\subsection{Eigenvalores}
 
-En este método se calculan los eigenvalores de la matriz de adyacencia $A$ del grafo de transición, se ordenan y se usan como embedding de la regla: dos reglas se comparan mediante la distancia coseno entre sus vectores. Si dos grafos son isomorfos, sus matrices de adyacencia son similares por una permutación y producen los mismos eigenvalores, por lo que la distancia es cero. En caso contrario, la distancia mide qué tan distintos son sus espectros. Este método obtiene un máximo de 74 comportamientos (18 células) distintos en ECA.
+En este método se calculan los eigenvalores de la matriz de adyacencia $A$ del grafo de transición, se ordenan y se usan como \emph{embedding} de la regla: dos reglas se comparan mediante la distancia coseno entre sus vectores. Si dos grafos son isomorfos, sus matrices de adyacencia son similares por una permutación y producen los mismos eigenvalores, por lo que la distancia es cero. En caso contrario, la distancia mide qué tan distintos son sus espectros. Este método obtiene un máximo de 74 comportamientos (18 células) distintos en ECA.
 
-Este metodo tiene dos limitaciones:
+Este método tiene dos limitaciones:
 
 \begin{table}[!htbp]
     \centering
     \begin{tabular}{p{0.15\textwidth} p{0.85\textwidth}}
         Ceguera a los transitorios: &
-        Cada componente conexa tiene una cuenca y arboles transitorios. Como los árboles aportan eigenvalues nulos el espectro depende unicamente de comparar los atractores y no los árboles. Las reglas 0 y 8 de ECA no tienen ninguna relación mediante inheritance properties, Sin embargo, ambas tienen un único atractor de punto de fijo formado por puros ceros: 1 paso para la regla 0 y maximo 2 pasos para la regla 8, por lo que sus eigenvalues son identicos. \\
+        Cada componente conexa está formada por un ciclo y los árboles transitorios que llegan a él. Como los árboles solo aportan eigenvalores nulos, el espectro depende únicamente de los atractores y no de los árboles. Las reglas 0 y 8 de ECA no están relacionadas por ninguna propiedad de herencia; sin embargo, ambas tienen un único atractor, el punto fijo formado solo por ceros, al que se llega en 1 paso con la regla 0 y en a lo más 2 pasos con la regla 8, por lo que sus eigenvalores son idénticos. \\
         Dependencia del dominio: &
         El número de eigenvalores es igual al número de nodos $N = |\mathcal{S}|^n$, por lo que solo se pueden comparar reglas con el mismo número de estados y el mismo tamaño de espacio.
     \end{tabular}
 \end{table}
 
-En el grafo completo el número de clases oscila entre 67 y 74 a partir de $n = 8$, con el máximo en $n = 18$ (Figura~\ref{fig:eigen-classes}. En todos los tamaños la partición por forma canónica es más fina que la del espectro. En el cociente se obtienen menos clases (entre 56 y 63 a partir de $n = 12$), pues además de la ceguera a los transitorios identifica cada regla con su composición con la traslación, como \{15,51\} y \{170,204\}. El cociente no aporta información al espectro, ademas, al combinar los 29 tamaños de ambos grafos se alcanza un limite de 77.
+En el grafo completo el número de clases oscila entre 67 y 74 a partir de $n = 8$, con el máximo en $n = 18$ (Figura~\ref{fig:eigen-classes}). En todos los tamaños la partición por forma canónica es más fina que la del espectro. En el cociente se obtienen menos clases (entre 56 y 63 a partir de $n = 12$), pues además de la ceguera a los transitorios identifica cada regla con su composición con la traslación, como \{15,51\} y \{170,204\}. El cociente no aporta información al espectro: al combinar los 29 tamaños de ambos grafos se alcanza un límite de 77 clases, el mismo que con el grafo completo.
 
 \begin{figure}[!htbp]
 \centering
@@ -28,7 +28,7 @@ En el grafo completo el número de clases oscila entre 67 y 74 a partir de $n = 
 \label{fig:eigen-classes}
 \end{figure}
 
-Las relaciones: \{0,8\}, \{1,19\}, \{2,24,46\}, \{4,12\}, \{18,126\}, \{36,72\}, \{128,136\}, \{130,152\}, \{132,140\} y \{162,168\} tienen el mismo espectro en todos los tamaños calculados. Son reglas con los mismos ciclos que solo difieren en sus transitorios.
+Los grupos \{0,8\}, \{1,19\}, \{2,24,46\}, \{4,12\}, \{18,126\}, \{36,72\}, \{128,136\}, \{130,152\}, \{132,140\} y \{162,168\} tienen el mismo espectro en todos los tamaños calculados. Son reglas con los mismos ciclos que solo difieren en sus transitorios.
 
 \subsection{Momentos espectrales}
 
@@ -37,7 +37,7 @@ Para resolver la dependencia del dominio se propone usar momentos espectrales. E
   m_k = \frac{|\{x \in \mathcal{C} : F^k(x) = x\}|}{N}
 \]
 
-La longitud no depende del número de nodos sino de la longitud del vector de tamaño $K$, por lo que se pueden comparar reglas con diferente número de estados, vecinos o espacios. La desventaja es que $K$ debe elegirse de modo que los ciclos relevantes de ambos grafos queden dentro de la ventana. Los vectores se comparan mediante la distancia coseno, que es nuestro índice de similitud.
+La longitud del vector no depende del número de nodos sino de la ventana $K$, por lo que se pueden comparar reglas con diferente número de estados, vecinos o espacios. La desventaja es que $K$ debe elegirse de modo que los ciclos relevantes de ambos grafos queden dentro de la ventana. Los vectores se comparan mediante la distancia coseno, que es nuestro índice de similitud.
 
 En ECA, con el grafo cociente por rotaciones de 14 células y $K = 10$, se obtienen 63 vectores distintos para las 256 reglas. Sin embargo, como $m_k$ solo depende de los eigenvalores, este método hereda la ceguera a los transitorios (Figura~\ref{fig:sm-classes}).
 
@@ -78,7 +78,7 @@ Por ejemplo, con 5 células ($N = 32$), la regla 0 envía todas las configuracio
 \]
 que ya no son iguales, aunque sus momentos espectrales sí lo son.
 
-Este método tiene algunas limitaciones: La resolución con la que se mide la altura depende del periodo, pues las configuraciones se agrupan en intervalos de $p$ pasos: con periodos largos, una configuración con $h = 1$ y otra con $h = p$ cuentan en el mismo paso. Además, un ciclo con $p > K$ nunca se activa. 
+Este método tiene algunas limitaciones. La resolución con la que se mide la altura depende del periodo, pues las configuraciones se agrupan en intervalos de $p$ pasos: con periodos largos, una configuración con $h = 1$ y otra con $h = p$ cuentan en el mismo paso. Además, un ciclo con $p > K$ nunca se activa. 
 
 \begin{figure}[!htbp]
     \centering
@@ -91,7 +91,7 @@ Con la masa de atractor el número de clases aumenta considerablemente (Figura~\
 
 Las reglas 0 y 8 quedan separadas para todo $n \ge 3$. Combinando los 29 tamaños se obtienen 86 clases en el grafo completo, y basta con dos tamaños pequeños (por ejemplo, $n = 3$ y $n = 6$). Solo dos pares quedan juntos. En \{1,19\} las alturas exactas son distintas (con $p = 2$, algunas configuraciones tienen $h = 1$ en una regla y $h = 2$ en la otra), pero caen en el mismo intervalo de $p$ pasos: es la limitación de resolución descrita arriba. En \{4,12\} la distribución conjunta de altura y periodo es idéntica y las reglas solo difieren en la forma de los árboles, que únicamente distingue la forma canónica. El cociente, en cambio, agrupa las reglas que difieren en componer con la traslación (\{15,51\}, \{170,204\}, \{4,12,34\}, \ldots) y solo alcanza 81 clases. Usando el grafo completo y el cociente en el mismo tamaño se obtienen 87 clases con $n = 6, 10, 12, 14, 18, 22, 24$ y $26$.
 
-En la figura \ref{fig:all-methods} y en la tabla \ref{tab:methods} se observa la comparatva de todos los metodos. La forma canonica lidera en la representación de clases pero son los momentos espectrales con masa de atractor son el segundo mejor metodo que puede producir 87 clases en total, seguidos por los eigenvalues y los momentos espectrales simples. 
+En la Figura~\ref{fig:all-methods} y en la Tabla~\ref{tab:methods} se observa la comparativa de todos los métodos. La forma canónica distingue más clases, pero los momentos espectrales con masa de atractor son el segundo mejor método y pueden producir 87 clases en total, seguidos por los eigenvalores y los momentos espectrales simples.
 
 \begin{figure}[!htbp]
 \centering
