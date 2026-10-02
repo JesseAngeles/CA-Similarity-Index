@@ -1,42 +1,30 @@
-\section{Exact relations: Inheritance properties}
+\section{Relaciones exactas: propiedades de herencia}
 \label{sec:inheritance}
 
-Este método surge como una extensión de los criterios de equivalencia ya conocidos: la permutación de estados y las reglas espejo. Sugerimos que existen relaciones adicionales entre reglas de espacios diferentes. Por ejemplo, la regla 0 siempre tiene el mismo comportamiento sin importar el número de estados, el tamaño de la vecindad ni la dimensión. Con esto surge la siguiente pregunta: ¿cuáles son los criterios de similitud entre reglas de espacios diferentes?
-
-Para responderla, llamamos dominio de una regla a la 3-tupla de dimensión, estados y vecindad en la que está definida. Dos reglas pertenecen al mismo dominio si comparten los tres elementos.
+Este método extiende los criterios de equivalencia ya conocidos, la permutación de estados y las reglas espejo, a reglas de espacios diferentes. Por ejemplo, la regla 0 siempre tiene el mismo comportamiento sin importar el número de estados, el tamaño de la vecindad ni la dimensión. Para formalizarlo, llamamos dominio de una regla a la 3-tupla de dimensión, estados y vecindad en la que está definida; dos reglas pertenecen al mismo dominio si comparten los tres elementos.
 
 \subsection{Reglas del mismo dominio}
 \label{subsection:rules_same_domain}
 
-Para comparar el comportamiento de reglas del mismo dominio podemos aplicar la permutación de estados y las reglas espejo, que en ECA permiten reducir las 256 reglas a 88 clases~\cite{genaro2013_class}.
-
-Sean $\mathcal{A}_1$ y $\mathcal{A}_2$ dos autómatas celulares con el mismo dominio, y sea $(x_1, \dots, x_m) \in \mathcal{S}^m$ el estado de la vecindad. Decimos que $\mathcal{A}_1$ y $\mathcal{A}_2$ son equivalentes si se cumple alguna de las siguientes condiciones:
-
+En ECA, la permutación de estados y las reglas espejo reducen las 256 reglas a 88 clases~\cite{genaro2013_class}. Sean $\mathcal{A}_1$ y $\mathcal{A}_2$ dos autómatas celulares del mismo dominio y $(x_1, \dots, x_m) \in \mathcal{S}^m$ el estado de la vecindad. Decimos que son equivalentes si se cumple alguna de las siguientes condiciones:
 \begin{itemize}
-    \item \textbf{Permutación de estados}: existe una biyección de estados $\pi : \mathcal{S} \to \mathcal{S}$ tal que
+    \item \textbf{Permutación de estados}: existe una biyección $\pi : \mathcal{S} \to \mathcal{S}$ tal que
     \[
-    \mathcal{R}_2(x_1, \dots, x_m) = \pi\left( \mathcal{R}_1\left( \pi^{-1}(x_1), \dots, \pi^{-1}(x_m) \right) \right), \quad \forall (x_1, \dots, x_m) \in \mathcal{S}^m.
+    \mathcal{R}_2(x_1, \dots, x_m) = \pi\left( \mathcal{R}_1\left( \pi^{-1}(x_1), \dots, \pi^{-1}(x_m) \right) \right), \quad \forall (x_1, \dots, x_m) \in \mathcal{S}^m,
     \]
-    Es decir, si renombramos todos los estados, la estructura sigue siendo la misma. Para $\mathcal{S} = \{0, 1\}$, la única permutación no trivial es $\pi(x) = 1 - x$, que únicamente intercambia los estados.
+    es decir, si al renombrar los estados la estructura sigue siendo la misma. Para $\mathcal{S} = \{0, 1\}$, la única permutación no trivial es $\pi(x) = 1 - x$.
 
-    \item \textbf{Reglas espejo}: sea $M : \mathcal{S}^m \to \mathcal{S}^m$ la reflexión de la vecindad,
-    $M(x_1, \dots, x_m) = (x_m, \dots, x_1)$. Decimos que $\mathcal{A}_2$ es la regla espejo de $\mathcal{A}_1$ si
-    \[
-    \mathcal{R}_2(x_1, \dots, x_m) = \mathcal{R}_1\left( M(x_1, \dots, x_m) \right).
-    \]
-    Es decir, si reflejamos la configuración inicial, la evolucionamos con $\mathcal{A}_1$ y reflejamos el resultado, obtenemos exactamente la evolución de $\mathcal{A}_2$.
+    \item \textbf{Reglas espejo}: sea $M(x_1, \dots, x_m) = (x_m, \dots, x_1)$ la reflexión de la vecindad; $\mathcal{A}_2$ es la regla espejo de $\mathcal{A}_1$ si $\mathcal{R}_2 = \mathcal{R}_1 \circ M$. Es decir, si reflejamos la configuración inicial, la evolucionamos con $\mathcal{A}_1$ y reflejamos el resultado, obtenemos la evolución de $\mathcal{A}_2$.
 \end{itemize}
 
 \subsection{Reducción de estados}
 
-Sea $\mathcal{A}$ un autómata con $k \ge 2$ estados y sea $a = k - 1$ su estado más alto. La reducción de estados es posible cuando se cumplen las siguientes condiciones:
+Sea $\mathcal{A}$ un autómata celular y $a \in \mathcal{S}$ uno de sus estados. La reducción de estados es posible cuando:
 \begin{enumerate}
     \item El estado $a$ no es producido por la regla: $\mathcal{R}(x_1, \dots, x_m) \neq a, \; \forall (x_1, \dots, x_m) \in \mathcal{S}^m$.
-    \item Toda vecindad que contiene al estado $a$ produce el estado 0: $\mathcal{R}(x_1, \dots, x_m) = 0$ si $x_j = a$ para algún $j$.
+    \item Toda vecindad que contiene al estado $a$ produce siempre el mismo estado $b$: $\mathcal{R}(x_1, \dots, x_m) = b$ si $x_j = a$ para algún $j$.
 \end{enumerate}
-Entonces el autómata reducido es $\mathcal{A}' = (\mathcal{L}, \mathcal{S}', \mathcal{N}, \mathcal{R}')$ con $\mathcal{S}' = \mathcal{S} \setminus \{a\}$, donde $\mathcal{R}'$ es la restricción de $\mathcal{R}$ a $\mathcal{S}'^m$.
-
-La justificación es la siguiente: como el estado $a$ nunca es producido, solo puede aparecer en la condición inicial, y como toda vecindad que lo contiene produce 0, desaparece en el primer paso. Por lo tanto, a partir del primer paso la evolución de $\mathcal{A}$ es exactamente la de $\mathcal{A}'$. En sentido inverso, toda regla de $k$ estados se puede extender a $k + 1$ estados agregando un estado nuevo que nunca se produce y que envía al 0 toda vecindad en la que aparece. Combinada con la permutación de estados, la reducción se aplica a cualquier estado.
+Entonces el autómata reducido es $\mathcal{A}' = (\mathcal{L}, \mathcal{S}', \mathcal{N}, \mathcal{R}')$ con $\mathcal{S}' = \mathcal{S} \setminus \{a\}$ y $\mathcal{R}'$ la restricción de $\mathcal{R}$ a $\mathcal{S}'^m$. Como el estado $a$ nunca es producido, solo puede aparecer en la condición inicial, y como toda vecindad que lo contiene produce $b$, desaparece en el primer paso; a partir de ahí, la evolución de $\mathcal{A}$ es exactamente la de $\mathcal{A}'$. En sentido inverso, toda regla de $q$ estados se puede extender a $q + 1$ estados agregando un estado nuevo que nunca se produce y que envía al 0 toda vecindad en la que aparece.
 
 \subsection{Reducción de vecindad}
 
@@ -44,10 +32,6 @@ La reducción de vecindad es posible cuando el estado de un vecino no afecta a l
 \[
 \mathcal{R}(x_1, \dots, x_j, \dots, x_m) = \mathcal{R}(x_1, \dots, x_j', \dots, x_m), \quad \forall (x_1, \dots, x_m) \in \mathcal{S}^m, \; \forall x_j' \in \mathcal{S}.
 \]
-Entonces el autómata reducido es $\mathcal{A}' = (\mathcal{L}, \mathcal{S}, \mathcal{N}', \mathcal{R}')$ con $\mathcal{N}' = \mathcal{N} \setminus \{\vec{v}_j\}$.
+Entonces el autómata reducido es $\mathcal{A}' = (\mathcal{L}, \mathcal{S}, \mathcal{N}', \mathcal{R}')$ con $\mathcal{N}' = \mathcal{N} \setminus \{\vec{v}_j\}$. Si el vecino eliminado no está en uno de los extremos, la vecindad se ajusta para que sea contigua de $m - 1$ células, bajo la hipótesis de que la distancia entre los vecinos solo transforma el espacio de evolución y no el comportamiento.
 
-Si el vecino eliminado no está en uno de los extremos, la vecindad se ajusta para que sea contigua de $m - 1$ células. Para fines de esta investigación, esta equivalencia se aplica con cualquier vecino, bajo la hipótesis de que cambiar la posición de los vecinos solo transforma el espacio de evolución y no el comportamiento. Con esta relación, ECA se reduce a 81 clases, un rango que consideramos aceptable.
-
-\subsection{Clases de equivalencia}
-
-Con estas cuatro relaciones (permutación de estados, espejo, reducción de estados y reducción de vecindad) es posible relacionar reglas de dominios distintos. Aplicándolas de forma iterativa se construye un grafo de relaciones, cuyas componentes conexas son las clases de equivalencia. Aunque esta clasificación sigue siendo binaria (dos reglas son o no son equivalentes), funciona como referencia para validar los métodos siguientes: si dos reglas son equivalentes, su índice de similitud debería ser uno, es decir, su distancia debería ser cero.
+Aplicando estas cuatro relaciones de forma iterativa se construye un grafo de relaciones entre reglas de dominios distintos, cuyas componentes conexas son las clases de equivalencia; en ECA quedan 81 clases. Aunque esta clasificación sigue siendo binaria, funciona como referencia para validar los métodos siguientes.

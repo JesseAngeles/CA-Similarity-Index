@@ -1,16 +1,16 @@
-\section{Preliminaries}
+\section{Preliminares}
 
-Los autómatas celulares son una colección de células agrupadas en una red, donde cada una de ellas adquiere un estado de un conjunto finito. El sistema evoluciona en pasos de tiempo discretos y, en cada paso, todas las células actualizan su estado de manera síncrona en función del estado de sus células vecinas \cite{weisstein2002_ca,wolfram1982_ca,fsancho2016_ca}.
+Un autómata celular es una colección de células agrupadas en una red, donde cada una adquiere un estado de un conjunto finito. El sistema evoluciona en pasos de tiempo discretos y, en cada paso, todas las células actualizan su estado de manera síncrona en función del estado de sus vecinas~\cite{weisstein2002_ca,wolfram1982_ca,fsancho2016_ca}.
 
 \begin{definition}
 \label{def:ca}
 Un autómata celular es una 4-tupla $(\mathcal{L}, \mathcal{S}, \mathcal{N}, \mathcal{R})$ donde:
 \begin{itemize}
-    \item $\mathcal{L} \subseteq \mathbb{Z}^D$ es el espacio celular $D$-dimensional. Cada célula se identifica con un vector $\vec{i} \in \mathcal{L}$ que representa su posición en el espacio.
+    \item $\mathcal{L} \subseteq \mathbb{Z}^D$ es el espacio celular $D$-dimensional; cada célula se identifica con su posición $\vec{i} \in \mathcal{L}$.
 
-    \item $\mathcal{S} = \{0, 1, \dots, k-1\}$ es el conjunto finito de $k$ estados. El estado de la célula $\vec{i}$ en el tiempo $t$ se denota por $\sigma_{\vec{i}}(t) \in \mathcal{S}$.
+    \item $\mathcal{S} = \{0, 1, \dots, q-1\}$ es el conjunto finito de $q$ estados. El estado de la célula $\vec{i}$ en el tiempo $t$ se denota por $\sigma_{\vec{i}}(t) \in \mathcal{S}$.
 
-    \item $\mathcal{N} = (\vec{v}_1, \vec{v}_2, \dots, \vec{v}_m)$ es la tupla ordenada de los $m$ vectores de desplazamiento que definen la vecindad. Los vecinos de la célula $\vec{i}$ se encuentran en las posiciones $\vec{i} + \vec{v}_j$, con $j = 1, \dots, m$.
+    \item $\mathcal{N} = (\vec{v}_1, \dots, \vec{v}_m)$ es la tupla ordenada de los $m$ vectores de desplazamiento que definen la vecindad: los vecinos de $\vec{i}$ son las células $\vec{i} + \vec{v}_j$, con $j = 1, \dots, m$.
 
     \item $\mathcal{R} : \mathcal{S}^m \to \mathcal{S}$ es la regla local, que asigna el nuevo estado de una célula a partir de los estados de sus $m$ vecinos:
     \[
@@ -21,33 +21,17 @@ Un autómata celular es una 4-tupla $(\mathcal{L}, \mathcal{S}, \mathcal{N}, \ma
 
 El orden de la tupla $\mathcal{N}$ es relevante: determina la numeración de las reglas y permite definir relaciones como las reglas espejo (Sección~\ref{subsection:rules_same_domain}).
 
-\subsection{Espacio finito y condiciones de frontera}
+\subsection{Espacio, vecindades y reglas}
 
-Idealmente, los autómatas celulares evolucionan en espacios infinitos; sin embargo, en la práctica se establecen fronteras que restringen el espacio celular~\cite{bhattacharjee2019_ca,ponce2015_ca}. La condición de frontera puede ser abierta (se asigna un estado fijo a los vecinos faltantes) o periódica (los vecinos faltantes de una célula en la frontera son las células de la frontera opuesta)~\cite{ponce2015_ca,bhattacharjee2019_ca}.
+En la práctica, el espacio celular se restringe con fronteras abiertas, que asignan un estado fijo a los vecinos faltantes, o periódicas, que los toman de la frontera opuesta~\cite{bhattacharjee2019_ca,ponce2015_ca}. En este trabajo se utiliza siempre frontera periódica: en una dimensión, el espacio es un anillo de $n$ células, $\mathcal{L} = \mathbb{Z}_n$, y con radio $r$ la vecindad contiene las $m = 2r + 1$ células a distancia menor o igual a $r$, incluyendo a la propia célula.
 
-En este trabajo se utiliza siempre frontera periódica. En una dimensión, el espacio es un anillo de $n$ células, $\mathcal{L} = \mathbb{Z}_n$.
-
-\subsection{Vecindades y reglas}
-
-Para autómatas celulares unidimensionales con radio $r$, la vecindad contiene a todas las células a distancia menor o igual a $r$, incluyendo a la propia célula ($m = 2r + 1$), y la regla local se escribe como:
-\[
-\sigma_i(t + 1) = \mathcal{R}(\sigma_{i-r}(t), \dots, \sigma_i(t), \dots, \sigma_{i+r}(t)), \quad \mathcal{R} : \mathcal{S}^{2r+1} \to \mathcal{S}.
-\]
-
-El autómata celular elemental (ECA) considera $k = 2$, radio $r = 1$ ($m = 3$) y la regla $\mathcal{R} : \{0,1\}^3 \to \{0,1\}$. Existen $k^{m} = 2^3 = 8$ patrones posibles en la vecindad y a cada uno se le asigna un nuevo estado, por lo que el número total de reglas es $k^{k^{m}} = 2^8 = 256$. Cada regla se identifica con un número decimal leyendo como número binario los estados asignados a los patrones $111, 110, \dots, 000$~\cite{Wolfram2002_nks}.
-
-En general, denotamos por $r_{k,m}$ a la regla número $r$ con $k$ estados y $m$ vecinos, numerada de la misma forma en base $k$; así, las ECA son las reglas $r_{2,3}$. Cuando $m$ es par la vecindad no puede ser simétrica: con $m = 2$ usamos las células $(i-1, i)$, que es la convención de \textit{Mathematica} para el radio $r = 1/2$.
+El autómata celular elemental (ECA) considera $q = 2$, radio $r = 1$ ($m = 3$) y la regla $\mathcal{R} : \{0,1\}^3 \to \{0,1\}$. Existen $q^{m} = 2^3 = 8$ patrones posibles en la vecindad y a cada uno se le asigna un nuevo estado, por lo que el número total de reglas es $q^{q^{m}} = 2^8 = 256$. Cada regla se identifica con un número decimal leyendo como número binario los estados asignados a los patrones $111, 110, \dots, 000$~\cite{Wolfram2002_nks}. En general, denotamos por $r_{q,m}$ a la regla número $r$ con $q$ estados y $m$ vecinos, numerada de la misma forma en base $q$; así, las ECA son las reglas $r_{2,3}$. Cuando $m$ es par la vecindad no puede ser simétrica: con $m = 2$ usamos las células $(i-1, i)$, que es la convención de \textit{Mathematica} para el radio $r = 1/2$.
 
 \subsection{Función global y grafo de transición}
 
-Sea $\mathcal{C} = \mathcal{S}^{\mathcal{L}}$ el conjunto de configuraciones, con $N = |\mathcal{C}| = k^{|\mathcal{L}|}$. La función global $F : \mathcal{C} \to \mathcal{C}$ aplica la regla local a todas las células de forma síncrona:
-\[
-  F(\sigma)_{\vec{i}} = \mathcal{R}\left(\sigma_{\vec{i}+\vec{v}_1}, \dots, \sigma_{\vec{i}+\vec{v}_m}\right), \quad \forall \vec{i} \in \mathcal{L}.
-\]
-
-El grafo de transición $G_F = (\mathcal{C}, E)$ tiene un nodo por configuración y una arista dirigida $\sigma \to F(\sigma)$. Como $F$ es una función, cada nodo tiene grado de salida 1 (grafo funcional). Cada componente conexa contiene exactamente un ciclo, el atractor, del cual cuelgan árboles transitorios que junto con él forman su cuenca de atracción. Para cada $x \in \mathcal{C}$ definimos su periodo $p(x)$ como la longitud del ciclo al que llega, y su altura $h(x)$ como el mínimo número de pasos para alcanzarlo ($h(x) = 0$ si $x$ es periódica). Las configuraciones sin predecesor se conocen como Jardín del Edén.
+Sea $\mathcal{C} = \mathcal{S}^{\mathcal{L}}$ el conjunto de configuraciones, con $N = |\mathcal{C}| = q^{|\mathcal{L}|}$. La función global $F : \mathcal{C} \to \mathcal{C}$ aplica la regla local a todas las células de forma síncrona. El grafo de transición $G_F = (\mathcal{C}, E)$ tiene un nodo por configuración y una arista dirigida $\sigma \to F(\sigma)$. Como $F$ es una función, cada nodo tiene grado de salida 1 (grafo funcional). Cada componente conexa contiene exactamente un ciclo, el atractor, del cual cuelgan árboles transitorios que junto con él forman su cuenca de atracción. Para cada $x \in \mathcal{C}$ definimos su periodo $p(x)$ como la longitud del ciclo al que llega, y su altura $h(x)$ como el mínimo número de pasos para alcanzarlo ($h(x) = 0$ si $x$ es periódica). Las configuraciones sin predecesor se conocen como Jardín del Edén.
 
 \subsection{Cociente por traslaciones}
 \label{subsec:quotient}
 
-Sea $T$ la traslación de una posición en $\mathcal{L}$ (una rotación en el anillo $\mathbb{Z}_n$). Con frontera periódica, la función global conmuta con la traslación, $F \circ T = T \circ F$, por lo que dos configuraciones que difieren por una traslación tienen trayectorias equivalentes. Esto permite construir el grafo cociente, cuyos nodos son las clases de configuraciones bajo traslación y cuyas aristas son $[x] \to [F(x)]$. Todas las configuraciones de una misma clase tienen la misma altura, y el número de nodos se reduce aproximadamente a $N/|\mathcal{L}|$. En el grafo cociente cada clase cuenta como un solo nodo, por lo que las proporciones calculadas sobre él se normalizan por el número de clases.
+Sea $T$ la traslación de una posición en $\mathcal{L}$ (una rotación en el anillo $\mathbb{Z}_n$). Con frontera periódica, $F \circ T = T \circ F$, por lo que dos configuraciones que difieren por una traslación tienen trayectorias equivalentes. Esto permite construir el grafo cociente, cuyos nodos son las clases de configuraciones bajo traslación y cuyas aristas son $[x] \to [F(x)]$. Todas las configuraciones de una misma clase tienen la misma altura, y el número de nodos se reduce aproximadamente a $N/|\mathcal{L}|$. En el grafo cociente cada clase cuenta como un solo nodo, por lo que las proporciones calculadas sobre él se normalizan por el número de clases.

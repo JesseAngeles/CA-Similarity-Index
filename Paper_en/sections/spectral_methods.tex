@@ -1,84 +1,38 @@
 \section{Spectral methods}
 \label{sec:spectral}
 
-The methods seen so far only detect equality between rules. To obtain a gradual measure, we represent each rule as a numerical vector (embedding) derived from its transition graph, so that the distance between vectors works as a similarity index.
+To obtain a gradual measure, we represent each rule as a numerical vector (\emph{embedding}) derived from its transition graph, so that the distance between vectors works as a similarity index.
 
 \subsection{Eigenvalues}
 
-In this method we compute the eigenvalues of the adjacency matrix $A$ of the transition graph, sort them and use them as the embedding of the rule: two rules are compared through the cosine distance between their vectors. If two graphs are isomorphic, their adjacency matrices are similar through a permutation and produce the same eigenvalues, so the distance is zero. Otherwise, the distance measures how different their spectra are. This method obtains a maximum of 74 distinct behaviors (with 18 cells) in ECA.
+We compute the eigenvalues of the adjacency matrix of the transition graph, sort them and use them as the \emph{embedding} of the rule; two rules are compared through the cosine distance between their vectors, which measures how different their spectra are. This method has two limitations:
+\begin{itemize}
+    \item \textbf{Blindness to transients}: each connected component is made of trees that lead to a cycle, and since the trees only contribute zero eigenvalues, the spectrum depends only on the attractors. ECA rules 0 and 8 have a single attractor, reached in at most 1 and 2 steps, respectively, so their eigenvalues are identical.
+    \item \textbf{Domain dependence}: the number of eigenvalues equals the number of nodes $N = |\mathcal{S}|^n$, so only rules with the same number of states and the same space size can be compared.
+\end{itemize}
 
-This method has two limitations:
-
-\begin{table}[!htbp]
-    \centering
-    \begin{tabular}{p{0.15\textwidth} p{0.85\textwidth}}
-        Blindness to transients: &
-        Each connected component has a basin made of transient trees. Since the trees only contribute zero eigenvalues, the spectrum depends only on the attractors and not on the trees. ECA rules 0 and 8 are not related by any inheritance property; however, both have a single fixed-point attractor made of all zeros, reached in 1 step with rule 0 and in at most 2 steps with rule 8, so their eigenvalues are identical. \\
-        Domain dependence: &
-        The number of eigenvalues equals the number of nodes $N = |\mathcal{S}|^n$, so only rules with the same number of states and the same space size can be compared.
-    \end{tabular}
-\end{table}
-
-In the full graph the number of classes oscillates between 67 and 74 from $n = 8$ on, with the maximum at $n = 18$ (Figure~\ref{fig:eigen-classes}). For every size, the partition given by the canonical form is finer than the one given by the spectrum. The quotient yields fewer classes (between 56 and 63 from $n = 12$ on) because, besides the blindness to transients, it identifies each rule with its composition with the translation, such as \{15,51\} and \{170,204\}. The quotient adds no information to the spectrum: combining the 29 sizes of both graphs reaches a limit of 77.
-
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=0.85\textwidth]{eigenvalue_classes_combined_gpu.png}
-\caption{Number of distinct spectra among the 88 representative rules with the full transition graph and with the quotient graph by translations.}
-\label{fig:eigen-classes}
-\end{figure}
-
-The groups \{0,8\}, \{1,19\}, \{2,24,46\}, \{4,12\}, \{18,126\}, \{36,72\}, \{128,136\}, \{130,152\}, \{132,140\} and \{162,168\} have the same spectrum for every size computed. They are rules with the same cycles that differ only in their transients.
+In the full graph, from $n = 8$ on we obtain between 67 and 74 classes (Figure~\ref{fig:all-methods}). In the quotient, from $n = 12$ on we obtain between 56 and 63, and combining it with the full graph adds no classes (77 in both cases, Table~\ref{tab:methods}). The groups \{0,8\}, \{1,19\}, \{2,24,46\}, \{4,12\}, \{18,126\}, \{36,72\}, \{128,136\}, \{130,152\}, \{132,140\} and \{162,168\} have the same spectrum for every size computed: they have the same cycles and differ only in their transients.
 
 \subsection{Spectral moments}
 
-To remove the domain dependence we propose to use spectral moments. Instead of computing the full spectrum, for each step $k = 1, \dots, K$ we measure the proportion of configurations that return to themselves after $k$ steps:
+To remove the domain dependence we propose to use spectral moments: instead of the full spectrum, for each step $k = 1, \dots, K$ we measure the proportion of configurations that return to themselves after $k$ steps,
 \[
   m_k = \frac{|\{x \in \mathcal{C} : F^k(x) = x\}|}{N}.
 \]
-
-The length of the vector does not depend on the number of nodes but on the window size $K$, so rules with different numbers of states, neighbors or spaces can be compared. The drawback is that $K$ must be chosen so that the relevant cycles of both graphs fall inside the window. The vectors are compared through the cosine distance, which is our similarity index.
-
-In ECA, with the quotient graph by rotations of 14 cells and $K = 10$, we obtain 63 distinct vectors for the 256 rules. However, since $m_k$ depends only on the eigenvalues, this method inherits the blindness to transients (Figure~\ref{fig:sm-classes}).
-
-\begin{figure}[!htbp]
-    \centering
-    \includegraphics[width=\textwidth]{spectral_moments_classes_combined_gpu.png}
-    \caption{Number of distinct spectral moment vectors among the 88 representative rules for $n = 1, \dots, 29$ and $K = 10, 20, 30, 60$, in the full graph (solid line) and in the quotient graph (dashed line).}
-    \label{fig:sm-classes}
-\end{figure}
-
-A cycle of length $L > K$ is not captured by the vector. In the full graph with $K = 10$, the sizes with long cycles lose information ($n = 11, 13, 17, 19, 23$ and $29$ give between 31 and 34 classes). The sizes with many divisors give up to 72 ($n = 12$ and $24$).
-
-In the quotient the cycles become shorter and $K$ barely matters: with $K = 10$ it finds between 54 and 63 classes from $n = 13$ on, with a maximum of 63 at $n = 14$.
-
-Combining the 29 sizes gives 77 classes in the full graph and 68 in the quotient, the same as with the eigenvalues, for any $K$.
+The length of the vector does not depend on the number of nodes but on the window $K$, so rules with different numbers of states, neighbors or spaces can be compared; $K$ must be chosen so that it captures the relevant cycles of both graphs. Since $m_k$ depends only on the eigenvalues, this method inherits the blindness to transients. With $K = 60$ we obtain a maximum of 74 classes. In the full graph, increasing $K$ stabilizes the number of classes as $n$ grows, while in the quotient $K$ has little influence, since the cycles are shorter.
 
 \subsection{Spectral moments with attractor mass}
 \label{subsec:attractor_mass}
 
-To distinguish rules such as 0 and 8, we need to measure, besides the attractors, how strongly they attract the other configurations, that is, to quantify how many configurations reach each attractor and in how many steps. The idea is that each cycle is still activated every $p$ steps, as in the spectral moments, but at each activation we also add the configurations that have already reached it.
-
-Using the height $h(x)$ and the period $p(x)$ of each configuration, we define
+To distinguish rules such as 0 and 8, we need to measure, besides the attractors, how strongly they attract the other configurations, that is, how many configurations reach each attractor and in how many steps. The idea is that each cycle is still activated every $p$ steps, as in the spectral moments, but at each activation we also add the configurations that have already reached it. Using the height $h(x)$ and the period $p(x)$ of each configuration, we define
 \[
   \tilde{m}_k = \frac{|\{x \in \mathcal{C} : p(x) \mid k \ \text{ and } \ h(x) \le k - p(x)\}|}{N}, \quad k = 1, \dots, K.
 \]
-That is, a configuration counts at step $k$ if its attractor is activated at that step and the configuration had already reached it before the previous activation. Thus, cycle nodes ($h = 0$) count from the first activation ($k = p$), nodes with $1 \le h \le p$ from the second ($k = 2p$), nodes with $p < h \le 2p$ from the third, and so on.
+That is, a configuration counts at step $k$ if its attractor is activated at that step and the configuration had already reached it before the previous activation: cycle nodes ($h = 0$) count from the first activation ($k = p$), nodes with $1 \le h \le p$ from the second ($k = 2p$), and so on. Since every periodic configuration satisfies the condition when $p \mid k$, the vector decomposes as $\tilde{m}_k = m_k + t_k$, where $m_k$ is the spectral moment and $t_k$ is the proportion of transient configurations that count at step $k$. Thus, the new vector extends the spectral moments with the information of the basins and keeps their length $K$ independent of the domain, with the limitation that a cycle with $p > K$ is never activated.
 
-Since every periodic configuration satisfies the condition when $p \mid k$, the vector decomposes as
-\[
-  \tilde{m}_k = m_k + t_k,
-\]
-where $m_k$ is the spectral moment and $t_k$ is the proportion of transient configurations that count at step $k$. Therefore, the new vector extends the spectral moments with the information of the basins, and keeps the advantage of having a length $K$ independent of the domain.
+For example, with 5 cells ($N = 32$), rule 0 sends every configuration to zero in one step ($h \le 1$), whereas in rule 8 each block of ones leaves an isolated 1 that disappears in the next step ($h \le 2$); of the 32 configurations, 12 reach zero in at most one step. Their vectors, $\tilde{m}^{(0)} = \tfrac{1}{32}(1, 32, 32, \dots)$ and $\tilde{m}^{(8)} = \tfrac{1}{32}(1, 12, 32, \dots)$, are no longer equal, even though their spectral moments are.
 
-For example, with 5 cells ($N = 32$), rule 0 sends every configuration to zero in one step ($h \le 1$), whereas in rule 8 each block of ones leaves an isolated 1 that disappears in the next step ($h \le 2$); of the 32 configurations, 12 reach zero in at most one step. Their vectors are
-\[
-  \tilde{m}^{(0)} = \tfrac{1}{32}\,(1, 32, 32, 32, \dots), \qquad
-  \tilde{m}^{(8)} = \tfrac{1}{32}\,(1, 12, 32, 32, \dots),
-\]
-which are no longer equal, even though their spectral moments are.
-
-This method has some limitations. The resolution with which the height is measured depends on the period, since configurations are grouped in intervals of $p$ steps: with long periods, a configuration with $h = 1$ and another with $h = p$ count at the same step. Moreover, a cycle with $p > K$ is never activated.
+With the attractor mass the number of classes increases considerably (Figure~\ref{fig:am-classes}): in the full graph, with $K = 60$ and $n \ge 6$ we obtain between 79 and 83 classes, and the quotient reaches up to 80. Rules 0 and 8 are separated for every $n \ge 3$, and combining $n = 3$ and $n = 6$ gives 86 classes with the full graph. Only two pairs remain together: \{1,19\}, whose exact heights are different but fall in the same interval of $p$ steps, and \{4,12\}, which coincide in the distribution of height and period and differ only in the shape of the trees. The quotient, on the other hand, groups the rules that differ by a composition with the translation (\{15,51\}, \{170,204\}, \{4,12,34\}, \ldots) and only reaches 81 classes. Using the full graph and the quotient on the same size gives 87 classes with $n = 6, 10, 12, 14, 18, 22, 24$ and $26$.
 
 \begin{figure}[!htbp]
     \centering
@@ -87,18 +41,7 @@ This method has some limitations. The resolution with which the height is measur
     \label{fig:am-classes}
 \end{figure}
 
-With the attractor mass the number of classes increases considerably (Figure~\ref{fig:am-classes}). In the full graph, the sizes with many divisors give between 80 and 83 classes with $K = 10$, against a maximum of 74 with the eigenvalues and 72 with the spectral moments. The sizes with long cycles still depend on the window ($n = 29$ gives 52 classes with $K = 10$ and 81 with $K = 60$). In the quotient the number of classes depends only on $n \bmod 4$ from $n = 7$ on: with $K = 60$ we obtain 74 classes if $n$ is odd, 80 if $n \equiv 2 \pmod 4$ (79 with $n = 18$) and 76 if $4 \mid n$.
-
-Rules 0 and 8 are separated for every $n \ge 3$. Combining the 29 sizes gives 86 classes in the full graph, and two small sizes are enough (for example, $n = 3$ and $n = 6$). Only two pairs remain together. In \{1,19\} the exact heights are different (with $p = 2$, some configurations have $h = 1$ in one rule and $h = 2$ in the other), but they fall in the same interval of $p$ steps: this is the resolution limitation described above. In \{4,12\} the joint distribution of height and period is identical and the rules differ only in the shape of the trees, which only the canonical form distinguishes. The quotient, on the other hand, groups the rules that differ by a composition with the translation (\{15,51\}, \{170,204\}, \{4,12,34\}, \ldots) and only reaches 81 classes. Using the full graph and the quotient on the same size gives 87 classes with $n = 6, 10, 12, 14, 18, 22, 24$ and $26$.
-
-Figure~\ref{fig:all-methods} and Table~\ref{tab:methods} compare all the methods. The canonical form leads in the number of classes, but the spectral moments with attractor mass are the second best method, producing up to 87 classes in total, followed by the eigenvalues and the plain spectral moments.
-
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=\textwidth]{all_methods_8_classes_gpu.png}
-\caption{Number of classes among the 88 representative rules with each method for $n = 1, \dots, 29$.}
-\label{fig:all-methods}
-\end{figure}
+Figure~\ref{fig:all-methods} and Table~\ref{tab:methods} compare all the methods. The canonical form distinguishes more classes, but the spectral moments with attractor mass are the second best method and can produce 87 classes in total, followed by the eigenvalues and the plain spectral moments.
 
 \begin{table}[!htbp]
 \centering

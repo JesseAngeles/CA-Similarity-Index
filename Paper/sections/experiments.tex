@@ -1,18 +1,12 @@
-\section{Experiments}
+\section{Experimentos}
 \label{sec:experiments}
 
-En esta sección evaluamos únicamente el último método, los momentos espectrales con masa de atractor, con $K = 60$ y la distancia coseno
-\[
-  d(u, v) = 1 - \frac{u \cdot v}{\|u\|\,\|v\|},
-\]
-tanto en el grafo completo como en el cociente por traslaciones. Los vectores de las ECA provienen del cálculo en GPU de la Sección~\ref{sec:spectral}; los de las reglas de otros dominios se calcularon en CPU con hasta $n = 12$ células ($3^{12} = 531\,441$ configuraciones con 3 estados), y se verificó que ambos cálculos dan exactamente los mismos vectores para las 88 ECA.
+En esta sección evaluamos los momentos espectrales con masa de atractor con $K = 60$ y la distancia coseno $d(u, v) = 1 - u \cdot v / (\|u\|\,\|v\|)$, en el grafo completo y en el cociente. Los vectores de las reglas de otros dominios se calcularon con hasta $n = 12$ células y máximo 3 estados ($3^{12} = 531\,441$ configuraciones).
 
 \subsection{Reglas relacionadas de dominios distintos}
 \label{subsec:cross-domain}
 
-Calculamos las cuatro relaciones de la Sección~\ref{sec:inheritance} entre todas las reglas de los dominios $(k, m) = (2,1)$, $(2,2)$, $(2,3)$, $(3,1)$ y $(3,2)$, junto con la extensión a 3 estados de cada ECA (dominio $(3,3)$), y formamos las clases de equivalencia como componentes conexas del grafo de relaciones. Restringidas a ECA se recuperan las 81 clases, y 84 clases contienen reglas de al menos dos dominios. Por ejemplo, la regla 0 de todos los dominios, incluidos los de un solo estado, forma una sola clase; la identidad $204_{2,3}$ está en la misma clase que los desplazamientos $170_{2,3}$ y $240_{2,3}$, que $10_{2,2}$ y $12_{2,2}$, y que la identidad de un vecino $2_{2,1}$; y las reglas aditivas $60_{2,3}$, $90_{2,3}$ y $102_{2,3}$ están en la clase de $6_{2,2}$, el XOR de dos vecinos.
-
-Para cada par de reglas unidas directamente por una relación comparamos sus vectores en el mismo tamaño de espacio (no se evaluaron las imágenes por permutación de estados de las extensiones a 3 estados, pues sus grafos son isomorfos a los de las extensiones). La Tabla~\ref{tab:cross-domain} resume los resultados con $n = 12$. Como referencia, la mediana de la distancia entre pares de ECA de clases distintas es 0.33 en el grafo completo y 0.10 en el cociente.
+Calculamos las cuatro relaciones de la Sección~\ref{sec:inheritance} entre todas las reglas de los dominios $(q, m) = (2,1)$, $(2,2)$, $(2,3)$, $(3,1)$ y $(3,2)$, junto con la extensión a 3 estados de cada ECA (dominio $(3,3)$), y comparamos en el mismo tamaño de espacio los vectores de cada par de reglas unidas directamente por una relación (Tabla~\ref{tab:cross-domain}).
 
 \begin{table}[!htbp]
 \centering
@@ -39,62 +33,53 @@ ECA de clases distintas & $(2,3)$ & 3820 & 6 & 11 & 0.33 & 0.10 \\
 \label{tab:cross-domain}
 \end{table}
 
-La permutación de estados y el espejo con vecindad simétrica producen grafos isomorfos, por lo que la distancia es exactamente 0 en todos los casos. Con $m = 2$, en cambio, la vecindad $(i-1, i)$ reflejada es $(i, i+1)$: salvo la reflexión del anillo, la regla espejo es la original compuesta con una traslación, el grafo completo cambia (mediana 0.54) y el cociente vuelve a dar distancia 0 en los 104 pares.
+Con $m = 2$ la vecindad $(i-1, i)$ reflejada es $(i, i+1)$, por lo que la regla espejo es la original compuesta con una traslación: el grafo cociente ignora este efecto, mientras que el completo es sensible a la traslación (mediana 0.54). Lo mismo ocurre con la reducción de vecindad: si los vecinos que quedan conservan su posición, la regla reducida tiene la misma función global y la distancia es 0, y si la vecindad se recorre, la función global cambia por una traslación. Las únicas reducciones de ECA con distancia positiva en el cociente son las de reglas que dependen de vecinos no contiguos ($\sigma_{i-1}$ y $\sigma_{i+1}$), porque con $n$ par el anillo se descompone en dos subredes de $n/2$ células; con $n$ impar (por ejemplo, $n = 11$) la distancia es 0.
 
-Lo mismo ocurre con la reducción de vecindad. Si los vecinos que quedan conservan su posición (por ejemplo, al eliminar el vecino derecho de una ECA, pues con $m = 2$ la vecindad es $(i-1, i)$), la regla reducida tiene la misma función global y la distancia es 0. Si la vecindad se recorre, la función global cambia por una traslación: la identidad $204_{2,3}$ se reduce a $12_{2,2}$, que es un desplazamiento, y su distancia es 0.70 en el grafo completo y 0 en el cociente; al reducirla otra vez se llega a la identidad $2_{2,1}$, que vuelve a tener distancia 0 con la regla original. En el cociente, la regla reducida es la más cercana a la original entre las 16 reglas $(2,2)$ en 36 de las 38 reducciones de ECA, contra 22 en el grafo completo.
+La reducción de estados nunca da distancia 0. La extensión de una regla a $q + 1$ estados conserva sus ciclos, pero agrega $(q+1)^n - q^n$ Jardines del Edén, que con $n = 12$ son el 99.2\% de las configuraciones. Aun así, la extensión conserva en buena medida el orden de las distancias (correlación de Spearman de 0.47 en el grafo completo y 0.76 en el cociente), aunque la regla original es la ECA más cercana a su extensión solo en 5 de los 88 casos (10 en el cociente). En contraste, los momentos espectrales simples sí dan distancia 0, porque la extensión tiene los mismos ciclos y solo cambia la normalización.
 
-Las únicas reducciones de ECA con distancia positiva en el cociente son las de reglas que dependen de vecinos no contiguos ($\sigma_{i-1}$ y $\sigma_{i+1}$). En cuatro de ellas la distancia es a lo más 0.001, y solo es apreciable en $90_{2,3}$ ($\sigma_{i-1} \oplus \sigma_{i+1}$) y su complemento $165_{2,3}$, que se reducen a $6_{2,2}$ y $9_{2,2}$ igual que $60_{2,3}$ ($\sigma_{i-1} \oplus \sigma_i$) y $195_{2,3}$; son también los dos casos en que la regla reducida no es la más cercana. Con $n$ impar, la reindexación $i \mapsto 2i \bmod n$ convierte a la regla 90 en una traslación de la 60, y con $n = 11$ la distancia en el cociente es 0 para las 38 reducciones de ECA. Con $n$ par, en la regla 90 las células pares solo dependen de las impares y viceversa, el anillo se descompone en dos subredes de $n/2$ células y la distancia es 0.24 con $n = 12$. Es decir, la hipótesis de la Sección~\ref{sec:inheritance} de que la posición de los vecinos no cambia el comportamiento se cumple módulo traslaciones, salvo con vecindades no contiguas y $n$ par.
-
-La reducción de estados nunca da distancia 0. La extensión de una regla a $k + 1$ estados conserva sus ciclos, pero agrega $(k+1)^n - k^n$ configuraciones Jardín del Edén (todas las que contienen el estado nuevo), que con $n = 12$ son el 99.2\% de las configuraciones de la extensión de una ECA. En un paso esas configuraciones quedan con ceros alrededor de cada estado nuevo y llegan a los atractores en proporciones distintas a las de la regla original; como el vector se normaliza por $N$, dominan su forma. La mediana de la distancia es 0.083 en el grafo completo y 0.010 en el cociente, menor que entre reglas no relacionadas, pero la regla original es la ECA más cercana a su extensión solo en 5 de los 88 casos (10 en el cociente) y está entre las cinco más cercanas en 26. Aun así, la extensión conserva en buena medida el orden de las distancias: la correlación de Spearman entre las distancias de los 3828 pares de ECA y las de sus extensiones es 0.47 en el grafo completo y 0.76 en el cociente. En contraste, los momentos espectrales simples sí dan distancia 0, porque la extensión tiene los mismos ciclos y solo cambia la normalización. La masa de atractor gana la información de las cuencas, pero pierde la invariancia ante la reducción de estados.
+Por último, la distancia entre la regla 0 y la 8 es positiva para todo $n \ge 3$ y crece con $n$ (0.0072 con $n = 12$) hasta estabilizarse en 0.0085 con $n = 29$. Las reglas más cercanas a la 0 no son la 8, sino 4, 12 y 200 ($d \le 0.0004$), que llegan a un punto fijo en un solo paso.
 
 \subsection{Una regla en espacios de distinto tamaño}
 \label{subsec:sizes}
 
-Al comparar reglas de dominios distintos puede ser necesario usar tamaños distintos, por ejemplo porque con más estados no se alcanza el mismo $n$. Para medir qué tanto cambia el vector con el tamaño, comparamos cada una de las 88 ECA consigo misma en todos los pares de tamaños $n \neq n'$ con $n, n' \in \{8, \dots, 29\}$. La distancia mediana entre los vectores de una misma regla es 0.098 en el grafo completo y 0.001 en el cociente, contra 0.47 y 0.23 entre reglas distintas del mismo tamaño. Sin embargo, como muchas reglas tienen vecinos muy cercanos, la propia regla es la más cercana solo en el 25\% de los casos en el grafo completo y en el 33\% en el cociente (43\% y 61\% con tamaños consecutivos, Figura~\ref{fig:size-id}).
+Comparamos cada una de las 88 ECA consigo misma en todos los pares de tamaños $n \neq n'$ con $n, n' \in \{8, \dots, 29\}$. La distancia mediana entre los vectores de una misma regla es 0.098 en el grafo completo y 0.001 en el cociente, contra 0.47 y 0.23 entre reglas distintas del mismo tamaño. Sin embargo, como muchas reglas tienen vecinos muy cercanos, una regla se identifica (su vector más cercano en el otro tamaño es el suyo) solo en el 25\% de los casos en el grafo completo y en el 33\% en el cociente (Figura~\ref{fig:size-id}).
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=\textwidth]{attractor_mass_size_identification.png}
-\caption{Fracción de las 88 ECA cuyo vector en el tamaño $n$ tiene como vector más cercano, entre las 88 reglas en el tamaño $n'$, al de la misma regla ($K = 60$).}
+\includegraphics[width=0.85\textwidth]{attractor_mass_size_identification.png}
+\caption{Fracción de las 88 ECA que se identifican entre los tamaños $n$ y $n'$ ($K = 60$).}
 \label{fig:size-id}
 \end{figure}
 
-La estabilidad depende de la dinámica de cada regla. La negación (51) y la identidad (204) se identifican en todos los pares de tamaños, y en el grafo completo otras reglas cuyo vector apenas cambia con $n$, como 0, 8, 54, 62 y 94, en más del 80\%. Las reglas de desplazamiento (por ejemplo 2, 24, 34, 42, 56 y 170) nunca se identifican en el grafo completo, porque la longitud de sus ciclos depende de los divisores de $n$; el cociente las mejora (se identifican desde el 25\% de las veces, la regla 2, hasta siempre, la 170), pero las reglas caóticas y aditivas (18, 60, 122, 126, 146 y 150) siguen cambiando con el tamaño y casi nunca se identifican. Por lo tanto, la comparación entre tamaños distintos solo es confiable para reglas cuyos atractores no dependen de $n$, y en general conviene comparar en el mismo tamaño o en el mismo conjunto de tamaños.
-
-\subsection{Distancia entre las reglas 0 y 8}
-\label{subsec:rules-0-8}
-
-Con los eigenvalores y los momentos espectrales simples la distancia entre las reglas 0 y 8 es 0 en todos los tamaños. Con la masa de atractor es positiva para todo $n \ge 3$ y crece con $n$ hasta estabilizarse: 0.0012 con $n = 3$, 0.0072 con $n = 12$ y 0.0085 con $n = 29$ ($K = 60$; el cociente da valores casi iguales). Es una distancia pequeña porque los vectores solo difieren en $k = 2$, el paso extra que necesita la regla 8 para borrar los bloques de unos, y desde $k = 3$ ambos valen 1. Con una ventana más corta la diferencia pesa más: $d = 0.048$ con $K = 10$ y $n = 12$. Por la misma razón, las reglas más cercanas a la 0 no son la 8, sino reglas que llegan a un punto fijo en un solo paso, como 4, 12 y 200 ($d \le 0.0004$); la 8 es la decimocuarta. La masa de atractor distingue ambas reglas, pero la distancia coseno sobre un vector que se satura le da poco peso a los primeros pasos.
+La estabilidad depende de la dinámica de cada regla. La negación (51) y la identidad (204) se identifican en todos los pares de tamaños, y en el grafo completo otras reglas cuyo vector apenas cambia con $n$, como 0, 8, 54, 62 y 94, en más del 80\%. Las reglas de desplazamiento (por ejemplo 2, 24, 34, 42, 56 y 170) nunca se identifican en el grafo completo, porque la longitud de sus ciclos depende de los divisores de $n$; el cociente las mejora (desde el 25\% de las veces, la regla 2, hasta siempre, la 170), pero las reglas caóticas y aditivas (18, 60, 122, 126, 146 y 150) casi nunca se identifican. Por lo tanto, la comparación entre tamaños distintos solo es confiable para reglas cuyos atractores no dependen de $n$, y en general conviene comparar en el mismo tamaño.
 
 \subsection{Agrupamiento de las ECA}
 \label{subsec:clustering}
 
-Finalmente usamos la distancia para agrupar las 88 ECA representantes con $n = 12$ y $K = 60$. Probamos $k$-medoides y agrupamiento jerárquico (enlace promedio, completo y de Ward) con 4 y 5 grupos. La mejor partición es la de $k$-medoides con 4 grupos (silueta 0.70); con 5 grupos, los métodos jerárquicos (silueta de 0.67 a 0.69) mantienen tres grupos grandes casi iguales y reparten las reglas restantes en grupos de una a seis reglas. Para visualizarla proyectamos los vectores normalizados a dos dimensiones con escalamiento multidimensional clásico, que conserva el 77\% de la varianza (Figura~\ref{fig:clusters}). Los grupos se separan por el periodo dominante de sus atractores, ponderado por el tamaño de sus cuencas (Tabla~\ref{tab:clusters}).
+Finalmente agrupamos las 88 ECA representantes con $n = 12$ y $K = 60$. Probamos $k$-medoides y agrupamiento jerárquico con 4 y 5 grupos; la mejor partición es la de $k$-medoides con 4 grupos (silueta 0.70). La Figura~\ref{fig:clusters} muestra una proyección de los grupos a dos dimensiones por escalamiento multidimensional clásico, que conserva el 77\% de la varianza. Los grupos se separan por el periodo dominante de sus atractores (Tabla~\ref{tab:clusters}): el primero reúne reglas que llevan casi todo a puntos fijos, con un vector que se satura cerca de 1, como las reglas nulas y las reglas con muchos puntos fijos; el segundo, reglas cuyos atractores se desplazan, con ciclos de periodo $n$ o $2n$ que solo se activan en $k = 12, 24, \dots$; el tercero, reglas con atractores de periodo 2, cuyo vector alterna entre pasos pares e impares, como la negación y las reglas aditivas; y el cuarto, reglas con ciclos largos.
 
-\begin{figure}[!htbp]
+\begin{figure}[!ht]
 \centering
-\includegraphics[width=\textwidth]{attractor_mass_clusters_n12.png}
-\caption{Agrupamiento de las 88 ECA representantes por la masa de atractor ($n = 12$, $K = 60$, $k$-medoides con la distancia coseno). Arriba: proyección a dos dimensiones por escalamiento multidimensional clásico; los puntos muy cercanos comparten una etiqueta con el número de reglas entre paréntesis. Abajo: vector promedio de cada grupo para $k \le 36$.}
+\includegraphics[width=0.8\textwidth]{attractor_mass_clusters_n12.png}
+\caption{Proyección a dos dimensiones del agrupamiento de las 88 ECA representantes por la masa de atractor ($n = 12$, $K = 60$, $k$-medoides con 4 grupos). Los puntos muy cercanos comparten una etiqueta, con el número de reglas entre paréntesis.}
 \label{fig:clusters}
 \end{figure}
 
-\begin{table}[!htbp]
+\begin{table}[!ht]
 \centering
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{l c p{0.5\textwidth}}
+\begin{tabular}{p{0.2\textwidth} p{0.1\textwidth} p{0.63\textwidth}}
 \hline
-Grupo & Periodo dominante & Reglas \\
+Grupo & Periodo & Reglas \\
 \hline
-Punto fijo (30) & 1 (29 reglas) & 0, 4, 8, 12, 13, 22, 30, 32, 36, 40, 44, 72, 76, 77, 78, 94, 104, 106, 108, 128, 132, 136, 140, 160, 164, 168, 172, 200, 204, 232 \\
-Periodo $n$ (30) & 12 (27 reglas) & 2, 6, 9, 10, 11, 14, 15, 24, 25, 26, 34, 38, 41, 42, 43, 45, 46, 54, 56, 60, 74, 130, 134, 138, 142, 152, 154, 162, 170, 184 \\
-Periodo 2 (22) & 2 (16 reglas) & 1, 5, 7, 18, 19, 23, 28, 29, 33, 37, 50, 51, 57, 73, 90, 105, 122, 126, 146, 150, 156, 178 \\
-Periodos largos (6) & 24 (3 reglas) & 3, 27, 35, 58, 62, 110 \\
+Punto fijo (30) & 1 (29) & 0, 4, 8, 12, 13, 22, 30, 32, 36, 40, 44, 72, 76, 77, 78, 94, 104, 106, 108, 128, 132, 136, 140, 160, 164, 168, 172, 200, 204, 232 \\
+Periodo $n$ (30) & 12 (27) & 2, 6, 9, 10, 11, 14, 15, 24, 25, 26, 34, 38, 41, 42, 43, 45, 46, 54, 56, 60, 74, 130, 134, 138, 142, 152, 154, 162, 170, 184 \\
+Periodo 2 (22) & 2 (16) & 1, 5, 7, 18, 19, 23, 28, 29, 33, 37, 50, 51, 57, 73, 90, 105, 122, 126, 146, 150, 156, 178 \\
+Periodo largo (6) & 24 (3) & 3, 27, 35, 58, 62, 110 \\
 \hline
 \end{tabular}
-\caption{Grupos de la Figura~\ref{fig:clusters}. El periodo dominante es el que reúne más configuraciones dentro de la ventana, con el número de reglas del grupo en las que domina.}
+\caption{Grupos de la Figura~\ref{fig:clusters}. Periodo: el periodo dominante, que reúne más configuraciones dentro de la ventana, y entre paréntesis el número de reglas del grupo en las que domina.}
 \label{tab:clusters}
 \end{table}
 
-El primer grupo reúne las reglas que llevan casi todo a puntos fijos: el vector crece desde los primeros pasos y se satura cerca de 1, como en las reglas nulas (0, 8, 32, 40, 128, 136, 160 y 168) y en reglas con muchos puntos fijos (4, 12, 76, 200 y 204). El segundo reúne las reglas cuyos atractores se desplazan, con ciclos de periodo $n$ o $2n$ que solo se activan en $k = 12, 24, \dots$, como los desplazamientos 2, 10, 24, 34, 42, 56, 130, 138, 152, 162 y 170 y la regla de tráfico 184. El tercero tiene atractores de periodo 2 (o de otros periodos pares cortos), con un vector que alterna entre pasos pares e impares, como la negación 51 y las reglas aditivas 90, 105 y 150. El cuarto agrupa reglas con ciclos más largos, entre ellas la 110.
-
-Dos limitaciones se hacen visibles. Primero, las reglas caóticas no forman un grupo propio. Con $n = 12$, 3828 de las 4096 configuraciones de la regla 30 (el 93.5\%) llegan a un ciclo de periodo 102, que la ventana $K = 60$ no alcanza, y casi todas las demás llegan al punto fijo de ceros; como la distancia coseno descarta la magnitud del vector, la regla 30 queda en el grupo de punto fijo. Las reglas 22 y 106 también caen en ese grupo, pero porque con $n = 12$ la mayoría de sus configuraciones (66\% y 62\%) sí llega a un punto fijo. Segundo, la partición depende del tamaño: el índice de Rand ajustado entre la partición con $n = 12$ y las obtenidas con los demás tamaños de 10 a 24 va de 0.36 a 0.72.
+Sin embargo, las reglas caóticas no forman un grupo propio, por dos razones. En algunas, la mayoría de las configuraciones llega a ciclos de periodo mayor que $K$, que nunca se activan, y casi todas las demás llegan a un punto fijo; como la distancia coseno descarta la magnitud del vector, quedan en el grupo de punto fijo (como la regla 30). En otras, la mayoría sí llega a un punto fijo (como las reglas 22 y 106).

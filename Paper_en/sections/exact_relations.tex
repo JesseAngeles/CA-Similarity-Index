@@ -1,43 +1,30 @@
 \section{Exact relations: Inheritance properties}
 \label{sec:inheritance}
 
-This method arises as an extension of the well-known equivalence criteria: state permutation and mirror rules. We suggest that there are additional relations between rules of different spaces. For example, rule 0 always has the same behavior regardless of the number of states, the size of the neighborhood or the dimension. This raises the following question: what are the similarity criteria between rules of different spaces?
-
-To this end, we call the domain of a rule the 3-tuple of dimension, states and neighborhood on which it is defined. Two rules belong to the same domain if they share all three elements.
+This method extends the well-known equivalence criteria, state permutation and mirror rules, to rules of different spaces. For example, rule 0 always has the same behavior regardless of the number of states, the size of the neighborhood or the dimension. To formalize this, we call the domain of a rule the 3-tuple of dimension, states and neighborhood on which it is defined; two rules belong to the same domain if they share all three elements.
 
 \subsection{Rules in the same domain}
 \label{subsection:rules_same_domain}
 
-To compare the behavior of rules in the same domain we can apply state permutation and mirror rules, which in ECA reduce the 256 rules to 88 classes \cite{genaro2013_class}.
-
-Let $\mathcal{A}_1$ and $\mathcal{A}_2$ be two cellular automata with the same domain, and let $(x_1, \dots, x_m) \in \mathcal{S}^m$ be the state of the neighborhood. We say that $\mathcal{A}_1$ and $\mathcal{A}_2$ are equivalent if one of the following conditions holds:
-
+In ECA, state permutation and mirror rules reduce the 256 rules to 88 classes~\cite{genaro2013_class}. Let $\mathcal{A}_1$ and $\mathcal{A}_2$ be two cellular automata in the same domain and $(x_1, \dots, x_m) \in \mathcal{S}^m$ the state of the neighborhood. We say that they are equivalent if one of the following conditions holds:
 \begin{itemize}
-    \item \textbf{State permutation}: there is a bijection of states $\pi : \mathcal{S} \to \mathcal{S}$ such that
+    \item \textbf{State permutation}: there is a bijection $\pi : \mathcal{S} \to \mathcal{S}$ such that
     \[
-    \mathcal{R}_2(x_1, \dots, x_m) = \pi\left( \mathcal{R}_1\left( \pi^{-1}(x_1), \dots, \pi^{-1}(x_m) \right) \right), \quad \forall (x_1, \dots, x_m) \in \mathcal{S}^m.
+    \mathcal{R}_2(x_1, \dots, x_m) = \pi\left( \mathcal{R}_1\left( \pi^{-1}(x_1), \dots, \pi^{-1}(x_m) \right) \right), \quad \forall (x_1, \dots, x_m) \in \mathcal{S}^m,
     \]
-    That is, if we relabel all the states, the structure remains the same. For $\mathcal{S} = \{0, 1\}$, the only non-trivial one is $\pi(x) = 1 - x$, which simply swaps the two states.
+    that is, if relabeling the states leaves the structure unchanged. For $\mathcal{S} = \{0, 1\}$, the only non-trivial permutation is $\pi(x) = 1 - x$.
 
-    \item \textbf{Mirror rules}: let $M : \mathcal{S}^m \to \mathcal{S}^m$ be the reflection of the neighborhood,
-    $M(x_1, \dots, x_m) = (x_m, \dots, x_1)$. We say that $\mathcal{A}_2$ is the mirror rule of $\mathcal{A}_1$ if
-    \[
-    \mathcal{R}_2(x_1, \dots, x_m) = \mathcal{R}_1\left( M(x_1, \dots, x_m) \right).
-    \]
-    That is, if we reflect the initial configuration, evolve it with $\mathcal{A}_1$ and reflect the result, we obtain exactly the evolution of $\mathcal{A}_2$.
+    \item \textbf{Mirror rules}: let $M(x_1, \dots, x_m) = (x_m, \dots, x_1)$ be the reflection of the neighborhood; $\mathcal{A}_2$ is the mirror rule of $\mathcal{A}_1$ if $\mathcal{R}_2 = \mathcal{R}_1 \circ M$. That is, if we reflect the initial configuration, evolve it with $\mathcal{A}_1$ and reflect the result, we obtain the evolution of $\mathcal{A}_2$.
 \end{itemize}
 
 \subsection{State reduction}
 
-Let $\mathcal{A}$ be a rule. State reduction is possible when there are two states $a \neq b \in \mathcal{S}$ that satisfy the following conditions:
+Let $\mathcal{A}$ be a cellular automaton and $a \in \mathcal{S}$ one of its states. State reduction is possible when:
 \begin{enumerate}
-
     \item State $a$ is never produced by the rule: $\mathcal{R}(x_1, \dots, x_m) \neq a, \; \forall (x_1, \dots, x_m) \in \mathcal{S}^m$.
-    \item State $a$ behaves like $b$ in every position of the neighborhood: $\mathcal{R}(x_1, \dots,a, \dots, x_m) = \mathcal{R}(x_1, \dots,b,\dots, x_m)$.
+    \item Every neighborhood that contains state $a$ always produces the same state $b$: $\mathcal{R}(x_1, \dots, x_m) = b$ if $x_j = a$ for some $j$.
 \end{enumerate}
-Then the reduced automaton is $\mathcal{A}' = (\mathcal{L}, \mathcal{S}', \mathcal{N}, \mathcal{R}')$ with $\mathcal{S}' = \mathcal{S} \setminus \{a\}$.
-
-The justification is as follows: since state $a$ is never produced, it can only appear in the initial condition, and since its transitions coincide with those of $b$, both have the same behavior for every configuration $\sigma$. Therefore, from the first step on, the evolution of $\mathcal{A}$ is exactly that of $\mathcal{A}'$.
+Then the reduced automaton is $\mathcal{A}' = (\mathcal{L}, \mathcal{S}', \mathcal{N}, \mathcal{R}')$ with $\mathcal{S}' = \mathcal{S} \setminus \{a\}$ and $\mathcal{R}'$ the restriction of $\mathcal{R}$ to $\mathcal{S}'^m$. Since state $a$ is never produced, it can only appear in the initial condition, and since every neighborhood that contains it produces $b$, it disappears in the first step; from then on, the evolution of $\mathcal{A}$ is exactly that of $\mathcal{A}'$. Conversely, every rule with $q$ states can be extended to $q + 1$ states by adding a new state that is never produced and that sends every neighborhood in which it appears to 0.
 
 \subsection{Neighborhood reduction}
 
@@ -45,10 +32,6 @@ Neighborhood reduction is possible when the state of a neighbor does not affect 
 \[
 \mathcal{R}(x_1, \dots, x_j, \dots, x_m) = \mathcal{R}(x_1, \dots, x_j', \dots, x_m), \quad \forall (x_1, \dots, x_m) \in \mathcal{S}^m, \; \forall x_j' \in \mathcal{S}.
 \]
-Then the reduced automaton is $\mathcal{A}' = (\mathcal{L}, \mathcal{S}, \mathcal{N}', \mathcal{R}')$ with $\mathcal{N}' = \mathcal{N} \setminus \{\vec{v}_j\}$.
+Then the reduced automaton is $\mathcal{A}' = (\mathcal{L}, \mathcal{S}, \mathcal{N}', \mathcal{R}')$ with $\mathcal{N}' = \mathcal{N} \setminus \{\vec{v}_j\}$. If the removed neighbor is not at one of the ends, the neighborhood is adjusted so that it is contiguous with $m - 1$ cells, under the hypothesis that the distance between the neighbors only transforms the space of the evolution and not the behavior.
 
-If the removed neighbor is not at one of the ends, the neighborhood is adjusted so that it is contiguous with $m - 1$ cells. For the purposes of this research, this equivalence is applied to any neighbor, under the hypothesis that changing the position of the neighbors only transforms the space of the evolution and not the behavior. With this relation, ECA drops to 81 classes, a range we consider acceptable.
-
-\subsection{Equivalence classes}
-
-With these four relations (state permutation, mirror, state reduction and neighborhood reduction) it is possible to relate rules from different domains. Applying them iteratively builds a relation graph whose connected components are the equivalence classes. Although this classification is still binary (two rules either are or are not equivalent), it serves as a reference to validate the following methods: if two rules are equivalent, their similarity index should be one.
+Applying these four relations iteratively builds a relation graph between rules of different domains, whose connected components are the equivalence classes; in ECA, 81 classes remain. Although this classification is still binary, it serves as a reference to validate the following methods.

@@ -1,0 +1,85 @@
+\section{Experiments}
+\label{sec:experiments}
+
+In this section we evaluate the spectral moments with attractor mass with $K = 60$ and the cosine distance $d(u, v) = 1 - u \cdot v / (\|u\|\,\|v\|)$, in the full graph and in the quotient. The vectors of the rules from other domains were computed with up to $n = 12$ cells and at most 3 states ($3^{12} = 531\,441$ configurations).
+
+\subsection{Related rules from different domains}
+\label{subsec:cross-domain}
+
+We computed the four relations of Section~\ref{sec:inheritance} between all the rules of the domains $(q, m) = (2,1)$, $(2,2)$, $(2,3)$, $(3,1)$ and $(3,2)$, together with the 3-state extension of every ECA (domain $(3,3)$), and we compare on the same space size the vectors of each pair of rules directly linked by a relation (Table~\ref{tab:cross-domain}).
+
+\begin{table}[!htbp]
+\centering
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{llrcccc}
+\hline
+ & & & \multicolumn{2}{c}{Pairs with $d = 0$} & \multicolumn{2}{c}{Median of $d$} \\
+Relation & Domains & Pairs & Full & Quotient & Full & Quotient \\
+\hline
+State permutation & all except $(3,3)$ & 1010 & 1010 & 1010 & 0 & 0 \\
+Mirror, odd $m$ & $(2,3)$, $(3,3)$ & 384 & 384 & 384 & 0 & 0 \\
+Mirror, $m = 2$ & $(2,2)$, $(3,2)$ & 104 & 12 & 104 & 0.54 & 0 \\
+Neighborhood reduction & $(2,3) \to (2,2)$ & 38 & 20 & 32 & 0 & 0 \\
+ & $(2,2) \to (2,1)$ & 6 & 4 & 6 & 0 & 0 \\
+ & $(3,2) \to (3,1)$ & 51 & 33 & 51 & 0 & 0 \\
+State reduction & $(3,1) \to (2,1)$ & 4 & 0 & 0 & 0.008 & 0.008 \\
+ & $(3,2) \to (2,2)$ & 16 & 0 & 0 & 0.015 & 0.008 \\
+ & $(3,3) \to (2,3)$ & 256 & 0 & 0 & 0.083 & 0.010 \\
+\hline
+ECA of different classes & $(2,3)$ & 3820 & 6 & 11 & 0.33 & 0.10 \\
+\hline
+\end{tabular}
+\caption{Distance between the attractor mass vectors of rules linked by an inheritance relation, with $n = 12$ and $K = 60$. The last row is the reference: pairs of ECA that do not belong to the same class.}
+\label{tab:cross-domain}
+\end{table}
+
+With $m = 2$, the reflected neighborhood $(i-1, i)$ is $(i, i+1)$, so the mirror rule is the original one composed with a translation: the quotient graph ignores this effect, while the full graph is sensitive to the translation (median 0.54). The same happens with neighborhood reduction: if the remaining neighbors keep their position, the reduced rule has the same global function and the distance is 0, and if the neighborhood is shifted, the global function changes by a translation. The only ECA reductions with positive distance in the quotient are those of rules that depend on non-contiguous neighbors ($\sigma_{i-1}$ and $\sigma_{i+1}$), because with even $n$ the ring splits into two sublattices of $n/2$ cells; with odd $n$ (for example, $n = 11$) the distance is 0.
+
+State reduction never gives distance 0. The extension of a rule to $q + 1$ states preserves its cycles, but adds $(q+1)^n - q^n$ Gardens of Eden, which with $n = 12$ make up 99.2\% of the configurations. Even so, the extension largely preserves the order of the distances (Spearman correlation of 0.47 in the full graph and 0.76 in the quotient), although the original rule is the ECA closest to its extension in only 5 of the 88 cases (10 in the quotient). In contrast, the plain spectral moments do give distance 0, because the extension has the same cycles and only the normalization changes.
+
+Finally, the distance between rules 0 and 8 is positive for every $n \ge 3$ and grows with $n$ (0.0072 with $n = 12$) until it stabilizes at 0.0085 with $n = 29$. The rules closest to 0 are not 8 but 4, 12 and 200 ($d \le 0.0004$), which reach a fixed point in a single step.
+
+\subsection{One rule on spaces of different sizes}
+\label{subsec:sizes}
+
+We compare each of the 88 ECA with itself over all pairs of sizes $n \neq n'$ with $n, n' \in \{8, \dots, 29\}$. The median distance between the vectors of the same rule is 0.098 in the full graph and 0.001 in the quotient, against 0.47 and 0.23 between different rules of the same size. However, since many rules have very close neighbors, a rule is identified (its nearest vector at the other size is its own) in only 25\% of the cases in the full graph and 33\% in the quotient (Figure~\ref{fig:size-id}).
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{attractor_mass_size_identification.png}
+\caption{Fraction of the 88 ECA that are identified between sizes $n$ and $n'$ ($K = 60$).}
+\label{fig:size-id}
+\end{figure}
+
+Stability depends on the dynamics of each rule. Negation (51) and identity (204) are identified for every pair of sizes and, in the full graph, so are other rules whose vector barely changes with $n$, such as 0, 8, 54, 62 and 94, in more than 80\% of the pairs. Shift rules (for example 2, 24, 34, 42, 56 and 170) are never identified in the full graph, because the length of their cycles depends on the divisors of $n$; the quotient improves them (identification ranges from 25\% of the pairs for rule 2 to all of them for rule 170), but the chaotic and additive rules (18, 60, 122, 126, 146 and 150) are almost never identified. Therefore, the comparison between different sizes is only reliable for rules whose attractors do not depend on $n$, and in general it is better to compare on the same size.
+
+\subsection{Clustering of the ECA}
+\label{subsec:clustering}
+
+Finally, we cluster the 88 representative ECA with $n = 12$ and $K = 60$. We tried $k$-medoids and hierarchical clustering with 4 and 5 clusters; the best partition is the $k$-medoids one with 4 clusters (silhouette 0.70). Figure~\ref{fig:clusters} shows a projection of the clusters onto two dimensions by classical multidimensional scaling, which preserves 77\% of the variance. The clusters are separated by the dominant period of their attractors (Table~\ref{tab:clusters}): the first gathers rules that send almost everything to fixed points, with a vector that saturates close to 1, such as the null rules and the rules with many fixed points; the second, rules whose attractors shift, with cycles of period $n$ or $2n$ that are only activated at $k = 12, 24, \dots$; the third, rules with period-2 attractors, whose vector alternates between even and odd steps, such as negation and the additive rules; and the fourth, rules with long cycles.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.8\textwidth]{attractor_mass_clusters_n12.png}
+\caption{Two-dimensional projection of the clustering of the 88 representative ECA by attractor mass ($n = 12$, $K = 60$, $k$-medoids with 4 clusters). Very close points share a label, with the number of rules in parentheses.}
+\label{fig:clusters}
+\end{figure}
+
+\begin{table}[!ht]
+\centering
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{0.2\textwidth} p{0.1\textwidth} p{0.63\textwidth}}
+\hline
+Cluster & Period & Rules \\
+\hline
+Fixed point (30) & 1 (29) & 0, 4, 8, 12, 13, 22, 30, 32, 36, 40, 44, 72, 76, 77, 78, 94, 104, 106, 108, 128, 132, 136, 140, 160, 164, 168, 172, 200, 204, 232 \\
+Period $n$ (30) & 12 (27) & 2, 6, 9, 10, 11, 14, 15, 24, 25, 26, 34, 38, 41, 42, 43, 45, 46, 54, 56, 60, 74, 130, 134, 138, 142, 152, 154, 162, 170, 184 \\
+Period 2 (22) & 2 (16) & 1, 5, 7, 18, 19, 23, 28, 29, 33, 37, 50, 51, 57, 73, 90, 105, 122, 126, 146, 150, 156, 178 \\
+Long periods (6) & 24 (3) & 3, 27, 35, 58, 62, 110 \\
+\hline
+\end{tabular}
+\caption{Clusters of Figure~\ref{fig:clusters}. Period: the dominant period, which gathers the most configurations within the window, and in parentheses the number of rules of the cluster in which it dominates.}
+\label{tab:clusters}
+\end{table}
+
+However, the chaotic rules do not form a cluster of their own, for two reasons. In some of them, most configurations reach cycles with period greater than $K$, which are never activated, and almost all the others reach a fixed point; since the cosine distance discards the magnitude of the vector, they end up in the fixed-point cluster (e.g., rule 30). In others, most do reach a fixed point (e.g., rules 22 and 106).
