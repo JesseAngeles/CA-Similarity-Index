@@ -1,6 +1,6 @@
 # TODO
 
-## Paper: combinar las figuras de completo y cociente (pendiente, 2026-09-30)
+## Paper: combinar las figuras de completo y cociente (idea del 2026-09-30; ya implementada)
 
 Requiere Mathematica (PC principal, con el MCP de Wolfram).
 

@@ -37,27 +37,27 @@ Para resolver la dependencia del dominio se propone usar momentos espectrales. E
   m_k = \frac{|\{x \in \mathcal{C} : F^k(x) = x\}|}{N}
 \]
 
-La longitud no depende del numero de nodos sino de la longitud del vector de tamaño $K$, por lo que se pueden comparar reglas con diferente numero de estados, vecinos o espacios. La desventaja es que $K$ debe elegirse de modo que los ciclos relevantes de ambos grafos queden dentro de la ventana. Los vectores se comparan mediante la distancia coseno, que es nuestro índice de similitud.
+La longitud no depende del número de nodos sino de la longitud del vector de tamaño $K$, por lo que se pueden comparar reglas con diferente número de estados, vecinos o espacios. La desventaja es que $K$ debe elegirse de modo que los ciclos relevantes de ambos grafos queden dentro de la ventana. Los vectores se comparan mediante la distancia coseno, que es nuestro índice de similitud.
 
-En ECA, con el grafo cociente por rotaciones de 14 células y $K = 10$, se obtienen 63 vectores distintos para las 256 reglas. Sin embargo, como $m_k$ solo depende de los eigenvalores, este método hereda la ceguera a los transitorios, las figuras \ref{fig:sub:completo} y \ref{fig:sub:cociente}.
+En ECA, con el grafo cociente por rotaciones de 14 células y $K = 10$, se obtienen 63 vectores distintos para las 256 reglas. Sin embargo, como $m_k$ solo depende de los eigenvalores, este método hereda la ceguera a los transitorios (Figura~\ref{fig:sm-classes}).
 
 \begin{figure}[!htbp]
     \centering
-    \includegraphics[width=1\linewidth]{spectral_moments_classes_gpu.png}
-    \caption{Número de vectores de momentos espectrales distintos entre las 88 reglas representantes para $n = 1, \dots, 29$ y $K = 10, 20, 30, 60$.}
-    \label{fig:placeholder}
+    \includegraphics[width=\textwidth]{spectral_moments_classes_combined_gpu.png}
+    \caption{Número de vectores de momentos espectrales distintos entre las 88 reglas representantes para $n = 1, \dots, 29$ y $K = 10, 20, 30, 60$, en el grafo completo (línea continua) y en el grafo cociente (línea punteada).}
+    \label{fig:sm-classes}
 \end{figure}
 
-Un ciclo de longitud $L > K$ no es captado en el vector. En el grafo completo, con $K = 10$ los tamaños con ciclos largos pierden información ($n = 11, 13, 17, 19, 23$ y $29$ con 31 y 34 clases), Los tamaños con muchos divisores dan hasta 72 ($n = 12$ y $24$). 
+Un ciclo de longitud $L > K$ no es captado en el vector. En el grafo completo, con $K = 10$ los tamaños con ciclos largos pierden información ($n = 11, 13, 17, 19, 23$ y $29$ dan entre 31 y 34 clases). Los tamaños con muchos divisores dan hasta 72 ($n = 12$ y $24$). 
 
-En el cociente los ciclos se vuelven mas cortos y $K$ casi no importa: con $K = 10$ encuentra 54 y 63 clases desde $n = 13$, con un máximo de 63 en $n = 14$. 
+En el cociente los ciclos se vuelven más cortos y $K$ casi no importa: con $K = 10$ encuentra entre 54 y 63 clases desde $n = 13$, con un máximo de 63 en $n = 14$. 
 
 Combinando los 29 tamaños se obtienen 77 clases en el grafo completo y 68 en el cociente, las mismas que con los eigenvalores, para cualquier $K$.
 
 \subsection{Momentos espectrales con masa de atractor}
 \label{subsec:attractor_mass}
 
-Para distinguir reglas como la 0 y la 8 es necesario medir, además de los atractores, la fuerza con la que atraen a las demás configuraciones, es decir, cuantificar el numero de configuraciones que llegan a cada atractor y en cuántos pasos. La idea es que cada ciclo se siga activando cada $p$ pasos, como en los momentos espectrales, pero que en cada activación se sumen también las configuraciones que ya llegaron a él.
+Para distinguir reglas como la 0 y la 8 es necesario medir, además de los atractores, la fuerza con la que atraen a las demás configuraciones, es decir, cuantificar el número de configuraciones que llegan a cada atractor y en cuántos pasos. La idea es que cada ciclo se siga activando cada $p$ pasos, como en los momentos espectrales, pero que en cada activación se sumen también las configuraciones que ya llegaron a él.
 
 Usando la altura $h(x)$ y el periodo $p(x)$ de cada configuración, definimos
 \[
@@ -82,12 +82,12 @@ Este método tiene algunas limitaciones: La resolución con la que se mide la al
 
 \begin{figure}[!htbp]
     \centering
-    \includegraphics[width=1\linewidth]{attractor_mass_classes_gpu.png}
-    \caption{Número de vectores de momentos espectrales con masa de atractor distintos entre las 88 reglas representantes para $n = 1, \dots, 29$ y $K = 10, 20, 30, 60$.}
-    \label{fig:placeholder}
+    \includegraphics[width=\textwidth]{attractor_mass_classes_combined_gpu.png}
+    \caption{Número de vectores de momentos espectrales con masa de atractor distintos entre las 88 reglas representantes para $n = 1, \dots, 29$ y $K = 10, 20, 30, 60$, en el grafo completo (línea continua) y en el grafo cociente (línea punteada).}
+    \label{fig:am-classes}
 \end{figure}
 
-Con la masa de atractor el número de clases aumenta considerablemente (Figura~\ref{fig:sub:1_2}). En el grafo completo, los tamaños con muchos divisores dan entre 80 y 83 clases con $K = 10$, contra un máximo de 74 con los eigenvalores y 72 con los momentos espectrales. Los tamaños con ciclos largos siguen dependiendo de la ventana ($n = 29$ da 52 clases con $K = 10$ y 81 con $K = 60$). En el cociente el número de clases depende solo de $n \bmod 4$ desde $n = 7$: con $K = 60$ se obtienen 74 clases si $n$ es impar, 80 si $n \equiv 2 \pmod 4$ (79 con $n = 18$) y 76 si $4 \mid n$ (figura \ref{fig:sub:2_2}).
+Con la masa de atractor el número de clases aumenta considerablemente (Figura~\ref{fig:am-classes}). En el grafo completo, los tamaños con muchos divisores dan entre 80 y 83 clases con $K = 10$, contra un máximo de 74 con los eigenvalores y 72 con los momentos espectrales. Los tamaños con ciclos largos siguen dependiendo de la ventana ($n = 29$ da 52 clases con $K = 10$ y 81 con $K = 60$). En el cociente el número de clases depende solo de $n \bmod 4$ desde $n = 7$: con $K = 60$ se obtienen 74 clases si $n$ es impar, 80 si $n \equiv 2 \pmod 4$ (79 con $n = 18$) y 76 si $4 \mid n$.
 
 Las reglas 0 y 8 quedan separadas para todo $n \ge 3$. Combinando los 29 tamaños se obtienen 86 clases en el grafo completo, y basta con dos tamaños pequeños (por ejemplo, $n = 3$ y $n = 6$). Solo dos pares quedan juntos. En \{1,19\} las alturas exactas son distintas (con $p = 2$, algunas configuraciones tienen $h = 1$ en una regla y $h = 2$ en la otra), pero caen en el mismo intervalo de $p$ pasos: es la limitación de resolución descrita arriba. En \{4,12\} la distribución conjunta de altura y periodo es idéntica y las reglas solo difieren en la forma de los árboles, que únicamente distingue la forma canónica. El cociente, en cambio, agrupa las reglas que difieren en componer con la traslación (\{15,51\}, \{170,204\}, \{4,12,34\}, \ldots) y solo alcanza 81 clases. Usando el grafo completo y el cociente en el mismo tamaño se obtienen 87 clases con $n = 6, 10, 12, 14, 18, 22, 24$ y $26$.
 
